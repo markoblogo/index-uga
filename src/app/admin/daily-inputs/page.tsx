@@ -1,0 +1,259 @@
+import { requireDemoRole } from "@/lib/demo-auth";
+import {
+  getDailyInputData,
+  saveDailyInputs,
+  todayInputDate,
+  type DailyInputCell,
+  type DailyInputStatus,
+} from "@/lib/admin-daily-inputs";
+
+type DailyInputsPageProps = {
+  searchParams: Promise<{
+    date?: string;
+    saved?: string;
+  }>;
+};
+
+const statusLabels: Record<DailyInputStatus, string> = {
+  missing: "missing",
+  saved: "saved",
+  submitted_by_respondent: "submitted by respondent",
+  edited_by_admin: "edited by admin",
+};
+
+const statusClasses: Record<DailyInputStatus, string> = {
+  missing: "bg-black/5 text-black/45 ring-black/10",
+  saved: "bg-uga-mist text-uga-green ring-uga-green/15",
+  submitted_by_respondent: "bg-white text-uga-dark ring-black/15",
+  edited_by_admin: "bg-uga-green text-white ring-uga-green",
+};
+
+export default async function DailyInputsPage({
+  searchParams,
+}: DailyInputsPageProps) {
+  await requireDemoRole("admin");
+  const params = await searchParams;
+  const date = params.date ?? todayInputDate();
+  const data = await getDailyInputData(date);
+  const cellByKey = new Map(
+    data.cells.map((cell) => [
+      `${cell.commodityId}:${cell.respondentId}`,
+      cell,
+    ]),
+  );
+
+  async function save(formData: FormData) {
+    "use server";
+
+    const currentUser = await requireDemoRole("admin");
+    await saveDailyInputs(formData, currentUser);
+  }
+
+  return (
+    <section className="grid gap-6">
+      <div className="rounded-[1.5rem] border border-black/10 bg-white p-6 shadow-sm">
+        <div className="grid gap-6 xl:grid-cols-[1fr_auto] xl:items-end">
+          <div>
+            <p className="text-sm font-semibold uppercase tracking-[0.18em] text-uga-green">
+              Admin data entry
+            </p>
+            <h1 className="mt-3 text-3xl font-semibold tracking-tight">
+              Daily respondent price matrix
+            </h1>
+            <p className="mt-3 max-w-3xl text-sm leading-6 text-black/65">
+              Enter or review respondent prices in USD/t for {data.basisLabel}.
+              This page saves source data only; it does not publish the index.
+            </p>
+            <div className="mt-4 flex flex-wrap gap-2 text-xs font-semibold uppercase tracking-[0.12em]">
+              <span className="rounded-full bg-uga-mist px-3 py-1 text-uga-green">
+                Source: {data.source}
+              </span>
+              <span className="rounded-full bg-black px-3 py-1 text-white">
+                No publish action
+              </span>
+            </div>
+          </div>
+
+          <form className="flex flex-wrap items-end gap-3" method="get">
+            <label className="grid gap-2 text-sm font-semibold text-uga-dark">
+              Trade date
+              <input
+                className="rounded-xl border-black/15 px-4 py-3 text-base"
+                defaultValue={date}
+                name="date"
+                type="date"
+              />
+            </label>
+            <button
+              className="rounded-full border border-black/15 px-5 py-3 text-sm font-semibold text-uga-dark transition hover:border-uga-green hover:text-uga-green"
+              type="submit"
+            >
+              Load date
+            </button>
+          </form>
+        </div>
+
+        {params.saved ? (
+          <div className="mt-5 rounded-2xl border border-uga-green/20 bg-uga-mist px-4 py-3 text-sm font-semibold text-uga-green">
+            {params.saved === "database"
+              ? "Changes saved to the database and audit log entries were created."
+              : params.saved === "mock"
+                ? "Demo save accepted. Configure DATABASE_URL to persist changes and audit logs."
+                : "No valid prices were submitted."}
+          </div>
+        ) : null}
+      </div>
+
+      <form action={save} className="grid gap-5">
+        <input name="date" type="hidden" value={date} />
+        <div className="overflow-hidden rounded-[1.5rem] border border-black/10 bg-white shadow-sm">
+          <div className="overflow-x-auto">
+            <table className="min-w-[1840px] border-collapse text-left">
+              <thead className="bg-uga-dark text-white">
+                <tr>
+                  <th className="sticky left-0 z-10 w-56 bg-uga-dark px-4 py-4 text-xs font-semibold uppercase tracking-[0.16em] text-white/70">
+                    Commodity
+                  </th>
+                  {data.respondents.map((respondent) => (
+                    <th
+                      className="w-52 border-l border-white/10 px-4 py-4 align-bottom text-xs font-semibold uppercase tracking-[0.12em] text-white/70"
+                      key={respondent.id}
+                    >
+                      <span className="line-clamp-3 normal-case tracking-normal text-white">
+                        {respondent.name}
+                      </span>
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {data.commodities.map((commodity) => (
+                  <tr className="border-t border-black/10" key={commodity.id}>
+                    <th className="sticky left-0 z-10 w-56 bg-white px-4 py-5 align-top">
+                      <p className="text-base font-semibold text-uga-dark">
+                        {commodity.name}
+                      </p>
+                      <p className="mt-1 text-xs font-semibold uppercase tracking-[0.14em] text-black/45">
+                        {commodity.code}
+                      </p>
+                    </th>
+                    {data.respondents.map((respondent) => {
+                      const cell = cellByKey.get(
+                        `${commodity.id}:${respondent.id}`,
+                      );
+
+                      if (!cell) {
+                        return (
+                          <td
+                            className="border-l border-black/10 px-3 py-4"
+                            key={respondent.id}
+                          />
+                        );
+                      }
+
+                      return (
+                        <MatrixCell cell={cell} key={respondent.id} />
+                      );
+                    })}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div className="flex flex-col gap-3 rounded-[1.5rem] border border-black/10 bg-white p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between">
+          <p className="text-sm leading-6 text-black/60">
+            Saving updates source values and audit entries only. Publication is
+            handled from a separate workflow.
+          </p>
+          <button
+            className="rounded-full bg-uga-green px-5 py-3 text-sm font-semibold text-white shadow-soft transition hover:bg-uga-dark"
+            type="submit"
+          >
+            Save changes
+          </button>
+        </div>
+      </form>
+    </section>
+  );
+}
+
+function MatrixCell({ cell }: { cell: DailyInputCell }) {
+  const signedDifference =
+    cell.difference === null
+      ? "n/a"
+      : `${cell.difference > 0 ? "+" : ""}${cell.difference.toFixed(2)}`;
+  const deviation =
+    cell.deviationPct === null ? "n/a" : `${cell.deviationPct.toFixed(2)}%`;
+
+  return (
+    <td
+      className={
+        cell.warning
+          ? "border-l border-black/10 bg-red-50 px-3 py-4 align-top"
+          : "border-l border-black/10 px-3 py-4 align-top"
+      }
+    >
+      <div className="grid gap-3">
+        <input
+          aria-label={`${cell.commodityId} ${cell.respondentId} price`}
+          className={
+            cell.warning
+              ? "w-full rounded-xl border-red-300 bg-white px-3 py-2 text-sm font-semibold text-uga-dark focus:border-red-500 focus:ring-red-500"
+              : "w-full rounded-xl border-black/15 bg-white px-3 py-2 text-sm font-semibold text-uga-dark focus:border-uga-green focus:ring-uga-green"
+          }
+          defaultValue={cell.price ?? ""}
+          inputMode="decimal"
+          min="0"
+          name={`price:${cell.commodityId}:${cell.respondentId}`}
+          placeholder="missing"
+          step="0.01"
+          type="number"
+        />
+        <dl className="grid gap-1 text-xs text-black/55">
+          <div className="flex justify-between gap-2">
+            <dt>Spike</dt>
+            <dd className="font-semibold text-uga-dark">
+              ${cell.spikeIndicative.toFixed(2)}
+            </dd>
+          </div>
+          <div className="flex justify-between gap-2">
+            <dt>Diff</dt>
+            <dd
+              className={
+                cell.warning
+                  ? "font-semibold text-red-700"
+                  : "font-semibold text-uga-dark"
+              }
+            >
+              {signedDifference}
+            </dd>
+          </div>
+          <div className="flex justify-between gap-2">
+            <dt>Deviation</dt>
+            <dd
+              className={
+                cell.warning
+                  ? "font-semibold text-red-700"
+                  : "font-semibold text-uga-dark"
+              }
+            >
+              {deviation}
+            </dd>
+          </div>
+        </dl>
+        <span
+          className={`inline-flex w-fit rounded-full px-2.5 py-1 text-[0.68rem] font-semibold uppercase tracking-[0.1em] ring-1 ${statusClasses[cell.status]}`}
+        >
+          {statusLabels[cell.status]}
+        </span>
+        {cell.warning ? (
+          <p className="text-xs font-semibold text-red-700">
+            Large deviation vs Spike
+          </p>
+        ) : null}
+      </div>
+    </td>
+  );
+}

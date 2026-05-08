@@ -1,0 +1,680 @@
+import { Prisma } from "@prisma/client";
+import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
+import { db } from "@/lib/db";
+import type { DemoUser } from "@/lib/demo-auth";
+import {
+  getDemoCalculationVersion,
+  getDemoPublishedIndex,
+  getLatestDemoPublishedIndexBefore,
+  incrementDemoCalculationVersion,
+  setDemoPublishedIndex,
+} from "@/lib/demo-published-index-store";
+import {
+  calculateIndexValue,
+  type IndexCalculationStatus,
+  type PriceSubmission,
+} from "@/lib/index-calculation";
+import { computePublishedChange } from "@/lib/index-publish";
+import { commodities } from "@/lib/mock-data";
+import {
+  getDailyInputData,
+  hasDatabaseUrl,
+  todayInputDate,
+} from "@/lib/admin-daily-inputs";
+
+export { todayInputDate };
+
+export type AdminCalculationCommodity = {
+  id: string;
+  code: string;
+  name: string;
+  version: number;
+  status: IndexCalculationStatus;
+  rawCount: number;
+  usedCount: number;
+  median: number | null;
+  value: number | null;
+  rawValue: number | null;
+  spikeIndicative: number | null;
+  spikeDifference: number | null;
+  spikeDeviationPct: number | null;
+  excluded: Array<{
+    respondentId: string;
+    respondentName: string;
+    price: number;
+    deviationPct: number;
+  }>;
+  published: {
+    value: number;
+    changeAbs: number | null;
+    changePct: number | null;
+    locked: boolean;
+  } | null;
+};
+
+export type AdminCalculationData = {
+  date: string;
+  basisLabel: string;
+  source: "database" | "mock";
+  commodities: AdminCalculationCommodity[];
+};
+
+const BASIS_CODE = "FOB_BLACK_SEA";
+const MOCK_BASIS_ID = "fob-black-sea";
+const BASKET_CODE = "FOB_BLACK_SEA_DEMO";
+
+export async function getAdminCalculationData(
+  date: string,
+): Promise<AdminCalculationData> {
+  if (!hasDatabaseUrl()) {
+    return getMockCalculationData(date);
+  }
+
+  try {
+    return await getDatabaseCalculationData(date);
+  } catch (error) {
+    console.warn("Falling back to mock calculation data.", error);
+    return getMockCalculationData(date);
+  }
+}
+
+export async function recalculateAdminIndices(formData: FormData, user: DemoUser) {
+  const date = String(formData.get("date") ?? todayInputDate());
+
+  if (!hasDatabaseUrl()) {
+    for (const commodity of commodities) {
+      incrementDemoCalculationVersion({
+        commodityId: commodity.id,
+        date,
+        deliveryBasisId: MOCK_BASIS_ID,
+      });
+    }
+
+    redirect(`/admin/calculate?date=${date}&notice=recalculated_mock`);
+  }
+
+  await persistDatabaseCalculations(date, user);
+  redirect(`/admin/calculate?date=${date}&notice=recalculated_database`);
+}
+
+export async function publishAdminIndices(formData: FormData, user: DemoUser) {
+  const date = String(formData.get("date") ?? todayInputDate());
+  const commodityId = String(formData.get("commodityId") ?? "");
+
+  if (!hasDatabaseUrl()) {
+    await publishMockIndices(date, commodityId || null);
+    revalidatePath("/uk");
+    revalidatePath("/en");
+    redirect(`/admin/calculate?date=${date}&notice=published_mock`);
+  }
+
+  const calculations = await persistDatabaseCalculations(date, user, commodityId || null);
+  await publishDatabaseCalculations(date, calculations, user);
+  revalidatePath("/uk");
+  revalidatePath("/en");
+  redirect(`/admin/calculate?date=${date}&notice=published_database`);
+}
+
+async function getMockCalculationData(date: string): Promise<AdminCalculationData> {
+  const inputData = await getDailyInputData(date);
+  const respondentNameById = new Map(
+    inputData.respondents.map((respondent) => [respondent.id, respondent.name]),
+  );
+  const cellsByCommodity = new Map<string, typeof inputData.cells>();
+
+  for (const cell of inputData.cells) {
+    const cells = cellsByCommodity.get(cell.commodityId) ?? [];
+    cells.push(cell);
+    cellsByCommodity.set(cell.commodityId, cells);
+  }
+
+  return {
+    date,
+    basisLabel: inputData.basisLabel,
+    source: "mock",
+    commodities: inputData.commodities.map((commodity) => {
+      const cells = cellsByCommodity.get(commodity.id) ?? [];
+      const result = calculateIndexValue({
+        date,
+        commodityId: commodity.id,
+        deliveryBasisId: MOCK_BASIS_ID,
+        submissions: cells.map((cell) => ({
+          respondentId: cell.respondentId,
+          price: cell.price,
+        })),
+      });
+      const spikeIndicative = cells[0]?.spikeIndicative ?? null;
+      const published = getDemoPublishedIndex({
+        commodityId: commodity.id,
+        date,
+        deliveryBasisId: MOCK_BASIS_ID,
+      });
+
+      return buildCalculationCommodity({
+        code: commodity.code,
+        name: commodity.name,
+        result,
+        spikeIndicative,
+        version: getDemoCalculationVersion({
+          commodityId: commodity.id,
+          date,
+          deliveryBasisId: MOCK_BASIS_ID,
+        }),
+        respondentNameById,
+        published,
+      });
+    }),
+  };
+}
+
+async function publishMockIndices(date: string, targetCommodityId: string | null) {
+  const data = await getMockCalculationData(date);
+
+  for (const commodity of data.commodities) {
+    if (targetCommodityId && commodity.id !== targetCommodityId) {
+      continue;
+    }
+
+    if (commodity.status !== "publishable" || commodity.value === null) {
+      continue;
+    }
+
+    const existing = getDemoPublishedIndex({
+      commodityId: commodity.id,
+      date,
+      deliveryBasisId: MOCK_BASIS_ID,
+    });
+
+    if (existing?.locked) {
+      continue;
+    }
+
+    const previous = getLatestDemoPublishedIndexBefore({
+      commodityId: commodity.id,
+      date,
+      deliveryBasisId: MOCK_BASIS_ID,
+    });
+    const change = computePublishedChange(commodity.value, previous?.value ?? null);
+
+    setDemoPublishedIndex({
+      commodityId: commodity.id,
+      date,
+      deliveryBasisId: MOCK_BASIS_ID,
+      value: commodity.value,
+      ...change,
+      locked: true,
+      publishedAt: new Date().toISOString(),
+      version: commodity.version,
+    });
+  }
+}
+
+async function getDatabaseCalculationData(date: string): Promise<AdminCalculationData> {
+  const context = await getDatabaseCalculationContext(date);
+
+  if (!context) {
+    return getMockCalculationData(date);
+  }
+
+  const { basis, basket, dbCommodities, existingCalculations, publishedIndices } =
+    context;
+
+  return {
+    date,
+    basisLabel: basis.name,
+    source: "database",
+    commodities: dbCommodities.map((commodity) => {
+      const calculationInput = buildDatabaseCalculationInput(context, commodity.id);
+      const result = calculateIndexValue({
+        date,
+        commodityId: commodity.id,
+        deliveryBasisId: basis.id,
+        basketWeight: basket.weight.toNumber(),
+        submissions: calculationInput.submissions,
+      });
+      const existingCalculation = existingCalculations.get(commodity.id);
+      const publishedIndex = publishedIndices.get(commodity.id);
+
+      return buildCalculationCommodity({
+        code: commodity.code,
+        name: commodity.nameUk,
+        result,
+        spikeIndicative: calculationInput.spikeIndicative,
+        version: existingCalculation?.version ?? 1,
+        respondentNameById: calculationInput.respondentNameById,
+        published: publishedIndex
+          ? {
+              value: publishedIndex.valueUsdPerMt.toNumber(),
+              changeAbs: publishedIndex.changeAbsUsdPerMt?.toNumber() ?? null,
+              changePct: publishedIndex.changePct?.toNumber() ?? null,
+              locked: publishedIndex.locked,
+            }
+          : null,
+      });
+    }),
+  };
+}
+
+async function persistDatabaseCalculations(
+  date: string,
+  user: DemoUser,
+  targetCommodityId?: string | null,
+) {
+  const context = await getDatabaseCalculationContext(date);
+
+  if (!context) {
+    return [];
+  }
+
+  const tradeDate = dateToUtcDate(date);
+  const savedCalculations = [];
+
+  for (const commodity of context.dbCommodities) {
+    if (targetCommodityId && commodity.id !== targetCommodityId) {
+      continue;
+    }
+
+    const calculationInput = buildDatabaseCalculationInput(context, commodity.id);
+    const result = calculateIndexValue({
+      date,
+      commodityId: commodity.id,
+      deliveryBasisId: context.basis.id,
+      basketWeight: context.basket.weight.toNumber(),
+      submissions: calculationInput.submissions,
+    });
+    const previousCalculation = context.existingCalculations.get(commodity.id);
+    const nextVersion = (previousCalculation?.version ?? 0) + 1;
+    const dbStatus = toDatabaseCalculationStatus(result.status);
+
+    const calculation = await db.indexCalculation.upsert({
+      where: {
+        tradeDate_commodityId_deliveryBasisId_basketId: {
+          tradeDate,
+          commodityId: commodity.id,
+          deliveryBasisId: context.basis.id,
+          basketId: context.basket.id,
+        },
+      },
+      update: {
+        status: dbStatus,
+        medianUsdPerMt: toDecimalOrNull(result.median),
+        valueUsdPerMt: toDecimalOrNull(result.rawValue),
+        publicValueUsdPerMt: toDecimalOrNull(result.value),
+        rawCount: result.rawCount,
+        usedCount: result.usedCount,
+        basketWeight: context.basket.weight,
+        version: nextVersion,
+        calculatedById: await getDatabaseUserId(user),
+        calculatedAt: new Date(),
+      },
+      create: {
+        tradeDate,
+        commodityId: commodity.id,
+        deliveryBasisId: context.basis.id,
+        basketId: context.basket.id,
+        status: dbStatus,
+        medianUsdPerMt: toDecimalOrNull(result.median),
+        valueUsdPerMt: toDecimalOrNull(result.rawValue),
+        publicValueUsdPerMt: toDecimalOrNull(result.value),
+        rawCount: result.rawCount,
+        usedCount: result.usedCount,
+        basketWeight: context.basket.weight,
+        version: nextVersion,
+        calculatedById: await getDatabaseUserId(user),
+      },
+    });
+
+    await db.indexCalculationItem.deleteMany({
+      where: { calculationId: calculation.id },
+    });
+
+    const excludedByRespondent = new Map(
+      result.excluded.map((item) => [item.respondentId, item]),
+    );
+
+    await db.indexCalculationItem.createMany({
+      data: calculationInput.selectedSubmissions.map((submission) => {
+        const excluded = excludedByRespondent.get(submission.respondentId);
+
+        return {
+          calculationId: calculation.id,
+          priceSubmissionId: submission.id,
+          respondentId: submission.respondentId,
+          priceUsdPerMt: submission.priceUsdPerMt,
+          included: !excluded,
+          deviationPct: excluded
+            ? new Prisma.Decimal(excluded.deviationPct)
+            : new Prisma.Decimal(0),
+          exclusionReason: excluded ? "outside_2pct_median_band" : null,
+        };
+      }),
+    });
+
+    await db.auditLog.create({
+      data: {
+        actorUserId: await getDatabaseUserId(user),
+        actorRole: "admin",
+        action: "index_calculation.recalculated",
+        entityType: "IndexCalculation",
+        entityId: calculation.id,
+        summary: `Recalculated version ${nextVersion} for ${commodity.code} on ${date}.`,
+        beforeJson: previousCalculation
+          ? {
+              version: previousCalculation.version,
+              status: previousCalculation.status,
+              publicValueUsdPerMt:
+                previousCalculation.publicValueUsdPerMt?.toNumber() ?? null,
+            }
+          : Prisma.JsonNull,
+        afterJson: {
+          version: nextVersion,
+          status: dbStatus,
+          publicValueUsdPerMt: result.value,
+          rawCount: result.rawCount,
+          usedCount: result.usedCount,
+        },
+      },
+    });
+
+    savedCalculations.push(calculation);
+  }
+
+  return savedCalculations;
+}
+
+async function publishDatabaseCalculations(
+  date: string,
+  calculations: Awaited<ReturnType<typeof persistDatabaseCalculations>>,
+  user: DemoUser,
+) {
+  const publisherUserId = await getDatabaseUserId(user);
+
+  for (const calculation of calculations) {
+    if (
+      calculation.status !== "verified" ||
+      calculation.publicValueUsdPerMt === null
+    ) {
+      continue;
+    }
+
+    const existing = await db.publishedIndex.findUnique({
+      where: {
+        tradeDate_commodityId_deliveryBasisId_basketId: {
+          tradeDate: calculation.tradeDate,
+          commodityId: calculation.commodityId,
+          deliveryBasisId: calculation.deliveryBasisId,
+          basketId: calculation.basketId,
+        },
+      },
+    });
+
+    if (existing?.locked) {
+      continue;
+    }
+
+    const previous = await db.publishedIndex.findFirst({
+      where: {
+        commodityId: calculation.commodityId,
+        deliveryBasisId: calculation.deliveryBasisId,
+        basketId: calculation.basketId,
+        tradeDate: { lt: calculation.tradeDate },
+        status: "published",
+        locked: true,
+      },
+      orderBy: { tradeDate: "desc" },
+    });
+    const currentValue = calculation.publicValueUsdPerMt.toNumber();
+    const change = computePublishedChange(
+      currentValue,
+      previous?.valueUsdPerMt.toNumber() ?? null,
+    );
+
+    const publishedIndex = await db.publishedIndex.create({
+      data: {
+        tradeDate: calculation.tradeDate,
+        commodityId: calculation.commodityId,
+        deliveryBasisId: calculation.deliveryBasisId,
+        basketId: calculation.basketId,
+        calculationId: calculation.id,
+        status: "published",
+        valueUsdPerMt: new Prisma.Decimal(currentValue),
+        changeAbsUsdPerMt:
+          change.changeAbs === null ? null : new Prisma.Decimal(change.changeAbs),
+        changePct:
+          change.changePct === null ? null : new Prisma.Decimal(change.changePct),
+        locked: true,
+        publishedById: publisherUserId,
+      },
+    });
+
+    await db.indexCalculation.update({
+      where: { id: calculation.id },
+      data: { status: "published" },
+    });
+
+    await db.auditLog.create({
+      data: {
+        actorUserId: publisherUserId,
+        actorRole: "admin",
+        action: "index.published",
+        entityType: "PublishedIndex",
+        entityId: publishedIndex.id,
+        summary: `Published locked index for ${calculation.commodityId} on ${date}.`,
+        beforeJson: Prisma.JsonNull,
+        afterJson: {
+          tradeDate: date,
+          commodityId: calculation.commodityId,
+          valueUsdPerMt: currentValue,
+          changeAbsUsdPerMt: change.changeAbs,
+          changePct: change.changePct,
+          locked: true,
+          calculationVersion: calculation.version,
+        },
+      },
+    });
+  }
+}
+
+async function getDatabaseCalculationContext(date: string) {
+  const tradeDate = dateToUtcDate(date);
+  const [basis, basket, dbCommodities, dbRespondents] = await Promise.all([
+    db.deliveryBasis.findUnique({ where: { code: BASIS_CODE } }),
+    db.basket.findUnique({ where: { code: BASKET_CODE } }),
+    db.commodity.findMany({
+      orderBy: { sortOrder: "asc" },
+      where: { status: "published" },
+    }),
+    db.respondent.findMany({
+      orderBy: { legalName: "asc" },
+      where: { active: true },
+    }),
+  ]);
+
+  if (!basis || !basket || dbCommodities.length === 0) {
+    return null;
+  }
+
+  const [submissions, indicatives, calculations, published] = await Promise.all([
+    db.priceSubmission.findMany({
+      where: {
+        tradeDate,
+        deliveryBasisId: basis.id,
+      },
+      orderBy: { updatedAt: "desc" },
+    }),
+    db.externalIndicative.findMany({
+      where: {
+        tradeDate,
+        deliveryBasisId: basis.id,
+        source: "spike",
+      },
+    }),
+    db.indexCalculation.findMany({
+      where: {
+        tradeDate,
+        deliveryBasisId: basis.id,
+        basketId: basket.id,
+      },
+    }),
+    db.publishedIndex.findMany({
+      where: {
+        tradeDate,
+        deliveryBasisId: basis.id,
+        basketId: basket.id,
+      },
+    }),
+  ]);
+
+  return {
+    basis,
+    basket,
+    dbCommodities,
+    dbRespondents,
+    submissions,
+    indicatives,
+    existingCalculations: new Map(
+      calculations.map((calculation) => [calculation.commodityId, calculation]),
+    ),
+    publishedIndices: new Map(
+      published.map((publishedIndex) => [publishedIndex.commodityId, publishedIndex]),
+    ),
+  };
+}
+
+function buildDatabaseCalculationInput(
+  context: NonNullable<Awaited<ReturnType<typeof getDatabaseCalculationContext>>>,
+  commodityId: string,
+) {
+  const respondentNameById = new Map(
+    context.dbRespondents.map((respondent) => [respondent.id, respondent.legalName]),
+  );
+  const submissionsByRespondent = new Map<string, typeof context.submissions>();
+
+  for (const submission of context.submissions) {
+    if (submission.commodityId !== commodityId) {
+      continue;
+    }
+
+    const current = submissionsByRespondent.get(submission.respondentId) ?? [];
+    current.push(submission);
+    submissionsByRespondent.set(submission.respondentId, current);
+  }
+
+  const selectedSubmissions = [...submissionsByRespondent.values()]
+    .map(
+      (submissions) =>
+        submissions.find((submission) => submission.source === "admin") ??
+        submissions.find((submission) => submission.source === "respondent"),
+    )
+    .filter((submission): submission is NonNullable<typeof submission> =>
+      Boolean(submission),
+    );
+  const indicative = context.indicatives.find(
+    (item) => item.commodityId === commodityId,
+  );
+
+  return {
+    respondentNameById,
+    selectedSubmissions,
+    spikeIndicative: indicative?.priceUsdPerMt.toNumber() ?? null,
+    submissions: selectedSubmissions.map(
+      (submission): PriceSubmission => ({
+        respondentId: submission.respondentId,
+        price: submission.priceUsdPerMt.toNumber(),
+      }),
+    ),
+  };
+}
+
+function buildCalculationCommodity({
+  code,
+  name,
+  result,
+  spikeIndicative,
+  version,
+  respondentNameById,
+  published,
+}: {
+  code: string;
+  name: string;
+  result: ReturnType<typeof calculateIndexValue>;
+  spikeIndicative: number | null;
+  version: number;
+  respondentNameById: Map<string, string>;
+  published: AdminCalculationCommodity["published"];
+}): AdminCalculationCommodity {
+  const spikeDifference =
+    result.value === null || spikeIndicative === null
+      ? null
+      : roundToOneDecimal(result.value - spikeIndicative);
+  const spikeDeviationPct =
+    spikeDifference === null || spikeIndicative === null
+      ? null
+      : roundToTwoDecimals((spikeDifference / spikeIndicative) * 100);
+
+  return {
+    id: result.commodityId,
+    code,
+    name,
+    version,
+    status: result.status,
+    rawCount: result.rawCount,
+    usedCount: result.usedCount,
+    median: result.median === null ? null : roundToOneDecimal(result.median),
+    value: result.value,
+    rawValue: result.rawValue,
+    spikeIndicative,
+    spikeDifference,
+    spikeDeviationPct,
+    excluded: result.excluded.map((item) => ({
+      ...item,
+      respondentName: respondentNameById.get(item.respondentId) ?? item.respondentId,
+      deviationPct: roundToTwoDecimals(item.deviationPct),
+    })),
+    published,
+  };
+}
+
+function toDatabaseCalculationStatus(status: IndexCalculationStatus) {
+  if (status === "publishable") {
+    return "verified";
+  }
+
+  return status;
+}
+
+async function getDatabaseUserId(user: DemoUser) {
+  const existing = await db.user.findFirst({
+    where: {
+      role: user.role,
+      OR: [{ email: user.username }, { name: user.username }],
+    },
+  });
+
+  if (existing) {
+    return existing.id;
+  }
+
+  const fallback = await db.user.findFirst({
+    where: { role: user.role },
+  });
+
+  return fallback?.id ?? null;
+}
+
+function toDecimalOrNull(value: number | null) {
+  return value === null ? null : new Prisma.Decimal(value);
+}
+
+function dateToUtcDate(date: string) {
+  return new Date(`${date}T00:00:00.000Z`);
+}
+
+function roundToOneDecimal(value: number) {
+  return Math.round(value * 10) / 10;
+}
+
+function roundToTwoDecimals(value: number) {
+  return Math.round(value * 100) / 100;
+}

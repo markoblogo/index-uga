@@ -1,0 +1,49 @@
+import Link from "next/link";
+import { LocaleSwitcher } from "@/components/ui/locale-switcher";
+import { SITE_CONFIG } from "@/lib/constants";
+import { getDictionary, type Locale } from "@/lib/i18n";
+
+export function SiteHeader({ locale }: { locale: Locale }) {
+  const dict = getDictionary(locale);
+  const navItems = [
+    { href: `/${locale}`, label: dict.nav.home },
+    { href: `/${locale}/about`, label: dict.nav.about },
+    { href: `/${locale}/methodology`, label: dict.nav.methodology },
+    { href: `/${locale}/analytics`, label: dict.nav.analytics },
+  ];
+
+  return (
+    <header className="sticky top-0 z-20 border-b border-black/10 bg-white/90 backdrop-blur">
+      <nav className="mx-auto flex max-w-7xl items-center justify-between gap-6 px-6 py-4 lg:px-8">
+        <Link className="flex items-center gap-3" href={`/${locale}`}>
+          <span className="flex h-10 w-10 items-center justify-center rounded-full bg-uga-green text-sm font-black text-white">
+            U
+          </span>
+          <span className="font-semibold tracking-tight text-uga-dark">
+            {SITE_CONFIG.name}
+          </span>
+        </Link>
+        <div className="hidden items-center gap-6 md:flex">
+          {navItems.map((item) => (
+            <Link
+              className="text-sm font-medium text-black/65 transition hover:text-uga-green"
+              href={item.href}
+              key={item.href}
+            >
+              {item.label}
+            </Link>
+          ))}
+        </div>
+        <div className="flex items-center gap-2">
+          <LocaleSwitcher locale={locale} />
+          <Link
+            className="hidden rounded-full bg-uga-green px-4 py-2 text-sm font-semibold text-white transition hover:bg-uga-dark sm:inline-flex"
+            href="/login"
+          >
+            {dict.nav.login}
+          </Link>
+        </div>
+      </nav>
+    </header>
+  );
+}

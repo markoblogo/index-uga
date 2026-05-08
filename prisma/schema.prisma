@@ -1,0 +1,260 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum CommodityStatus {
+  draft
+  verified
+  published
+}
+
+enum SubmissionSource {
+  admin
+  respondent
+  spike
+}
+
+enum SubmissionStatus {
+  draft
+  submitted
+  verified
+  published
+}
+
+enum CalculationStatus {
+  draft
+  verified
+  published
+  insufficient_data
+  no_data
+}
+
+enum UserRole {
+  admin
+  respondent
+  member
+}
+
+model Commodity {
+  id                  String                 @id @default(cuid())
+  code                String                 @unique
+  nameUk              String
+  nameEn              String
+  unit                String                 @default("metric_ton")
+  status              CommodityStatus        @default(published)
+  sortOrder           Int                    @default(0)
+  createdAt           DateTime               @default(now())
+  updatedAt           DateTime               @updatedAt
+  priceSubmissions    PriceSubmission[]
+  externalIndicatives ExternalIndicative[]
+  indexCalculations   IndexCalculation[]
+  publishedIndices    PublishedIndex[]
+
+  @@index([status, sortOrder])
+}
+
+model DeliveryBasis {
+  id                  String                 @id @default(cuid())
+  code                String                 @unique
+  name                String
+  region              String
+  status              CommodityStatus        @default(published)
+  createdAt           DateTime               @default(now())
+  updatedAt           DateTime               @updatedAt
+  baskets             Basket[]
+  priceSubmissions    PriceSubmission[]
+  externalIndicatives ExternalIndicative[]
+  indexCalculations   IndexCalculation[]
+  publishedIndices    PublishedIndex[]
+}
+
+model Respondent {
+  id                String             @id @default(cuid())
+  legalName         String
+  displayName       String
+  active            Boolean            @default(true)
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+  basketLinks       BasketRespondent[]
+  users             User[]
+  priceSubmissions  PriceSubmission[]
+  calculationItems  IndexCalculationItem[]
+}
+
+model Basket {
+  id                String             @id @default(cuid())
+  code              String             @unique
+  name              String
+  deliveryBasisId   String
+  weight            Decimal            @default(1) @db.Decimal(10, 4)
+  active            Boolean            @default(true)
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+  deliveryBasis     DeliveryBasis      @relation(fields: [deliveryBasisId], references: [id])
+  respondents       BasketRespondent[]
+  calculations      IndexCalculation[]
+  publishedIndices  PublishedIndex[]
+
+  @@index([deliveryBasisId, active])
+}
+
+model BasketRespondent {
+  id            String      @id @default(cuid())
+  basketId      String
+  respondentId  String
+  weight        Decimal     @default(1) @db.Decimal(10, 4)
+  active        Boolean     @default(true)
+  createdAt     DateTime    @default(now())
+  basket        Basket      @relation(fields: [basketId], references: [id])
+  respondent    Respondent  @relation(fields: [respondentId], references: [id])
+
+  @@unique([basketId, respondentId])
+  @@index([respondentId, active])
+}
+
+model User {
+  id                String             @id @default(cuid())
+  email             String             @unique
+  name              String
+  role              UserRole
+  respondentId      String?
+  active            Boolean            @default(true)
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+  respondent        Respondent?        @relation(fields: [respondentId], references: [id])
+  priceSubmissions  PriceSubmission[]
+  calculations      IndexCalculation[]
+  publishedIndices  PublishedIndex[]
+  auditLogs         AuditLog[]
+
+  @@index([role, active])
+}
+
+model PriceSubmission {
+  id                String             @id @default(cuid())
+  tradeDate         DateTime           @db.Date
+  commodityId       String
+  deliveryBasisId   String
+  respondentId      String
+  submittedById     String?
+  source            SubmissionSource
+  status            SubmissionStatus   @default(draft)
+  priceUsdPerMt     Decimal            @db.Decimal(12, 2)
+  submittedAt       DateTime?
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+  commodity         Commodity          @relation(fields: [commodityId], references: [id])
+  deliveryBasis     DeliveryBasis      @relation(fields: [deliveryBasisId], references: [id])
+  respondent        Respondent         @relation(fields: [respondentId], references: [id])
+  submittedBy       User?              @relation(fields: [submittedById], references: [id])
+  calculationItems  IndexCalculationItem[]
+
+  @@unique([tradeDate, commodityId, deliveryBasisId, respondentId, source])
+  @@index([tradeDate, commodityId, deliveryBasisId, status])
+}
+
+model ExternalIndicative {
+  id                String             @id @default(cuid())
+  tradeDate         DateTime           @db.Date
+  commodityId       String
+  deliveryBasisId   String
+  source            SubmissionSource   @default(spike)
+  status            SubmissionStatus   @default(submitted)
+  priceUsdPerMt     Decimal            @db.Decimal(12, 2)
+  receivedAt        DateTime           @default(now())
+  metadata          Json?
+  commodity         Commodity          @relation(fields: [commodityId], references: [id])
+  deliveryBasis     DeliveryBasis      @relation(fields: [deliveryBasisId], references: [id])
+
+  @@unique([tradeDate, commodityId, deliveryBasisId, source])
+  @@index([tradeDate, source, status])
+}
+
+model IndexCalculation {
+  id                String                 @id @default(cuid())
+  tradeDate         DateTime               @db.Date
+  commodityId       String
+  deliveryBasisId   String
+  basketId          String
+  status            CalculationStatus
+  medianUsdPerMt    Decimal?               @db.Decimal(12, 4)
+  valueUsdPerMt     Decimal?               @db.Decimal(12, 4)
+  publicValueUsdPerMt Decimal?              @db.Decimal(12, 1)
+  rawCount          Int                    @default(0)
+  usedCount         Int                    @default(0)
+  basketWeight      Decimal                @default(1) @db.Decimal(10, 4)
+  version           Int                    @default(1)
+  calculatedById    String?
+  calculatedAt      DateTime               @default(now())
+  commodity         Commodity              @relation(fields: [commodityId], references: [id])
+  deliveryBasis     DeliveryBasis          @relation(fields: [deliveryBasisId], references: [id])
+  basket            Basket                 @relation(fields: [basketId], references: [id])
+  calculatedBy      User?                  @relation(fields: [calculatedById], references: [id])
+  items             IndexCalculationItem[]
+  publishedIndex    PublishedIndex?
+
+  @@unique([tradeDate, commodityId, deliveryBasisId, basketId])
+  @@index([tradeDate, status])
+}
+
+model IndexCalculationItem {
+  id                  String             @id @default(cuid())
+  calculationId        String
+  priceSubmissionId    String?
+  respondentId         String?
+  priceUsdPerMt        Decimal           @db.Decimal(12, 2)
+  included             Boolean
+  deviationPct         Decimal?          @db.Decimal(10, 4)
+  exclusionReason      String?
+  calculation          IndexCalculation  @relation(fields: [calculationId], references: [id], onDelete: Cascade)
+  priceSubmission      PriceSubmission?  @relation(fields: [priceSubmissionId], references: [id])
+  respondent           Respondent?       @relation(fields: [respondentId], references: [id])
+
+  @@index([calculationId, included])
+  @@index([respondentId])
+}
+
+model PublishedIndex {
+  id                    String             @id @default(cuid())
+  tradeDate             DateTime           @db.Date
+  commodityId           String
+  deliveryBasisId       String
+  basketId              String
+  calculationId         String             @unique
+  status                SubmissionStatus   @default(published)
+  valueUsdPerMt         Decimal            @db.Decimal(12, 1)
+  changeAbsUsdPerMt     Decimal?           @db.Decimal(12, 1)
+  changePct             Decimal?           @db.Decimal(10, 2)
+  locked                Boolean            @default(true)
+  publishedById         String?
+  publishedAt           DateTime           @default(now())
+  commodity             Commodity          @relation(fields: [commodityId], references: [id])
+  deliveryBasis         DeliveryBasis      @relation(fields: [deliveryBasisId], references: [id])
+  basket                Basket             @relation(fields: [basketId], references: [id])
+  calculation           IndexCalculation   @relation(fields: [calculationId], references: [id])
+  publishedBy           User?              @relation(fields: [publishedById], references: [id])
+
+  @@unique([tradeDate, commodityId, deliveryBasisId, basketId])
+  @@index([tradeDate, locked])
+}
+
+model AuditLog {
+  id            String    @id @default(cuid())
+  actorUserId   String?
+  actorRole     UserRole?
+  action        String
+  entityType    String
+  entityId      String?
+  summary       String
+  beforeJson    Json?
+  afterJson     Json?
+  createdAt     DateTime  @default(now())
+  actorUser      User?     @relation(fields: [actorUserId], references: [id])
+
+  @@index([createdAt])
+  @@index([entityType, entityId])
+}
