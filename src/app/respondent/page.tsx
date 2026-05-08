@@ -39,13 +39,13 @@ export default async function RespondentPage({
 
   return (
     <section className="mx-auto grid max-w-3xl gap-5">
-      <div className="rounded-[1.5rem] border border-black/10 bg-white p-6 shadow-sm">
+      <div className="border border-black bg-white p-5">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
             <p className="text-sm font-semibold uppercase tracking-[0.18em] text-uga-green">
               {labels.badge}
             </p>
-            <h1 className="mt-3 text-3xl font-semibold tracking-tight">
+            <h1 className="mt-3 text-3xl font-black uppercase leading-tight tracking-normal">
               {labels.title}
             </h1>
             <p className="mt-3 text-sm leading-6 text-black/65">
@@ -56,8 +56,8 @@ export default async function RespondentPage({
             <Link
               className={
                 locale === "uk"
-                  ? "rounded-full bg-uga-dark px-3 py-2 text-xs font-semibold uppercase text-white"
-                  : "rounded-full border border-black/10 px-3 py-2 text-xs font-semibold uppercase text-black/60"
+                  ? "rounded-full bg-uga-dark px-3 py-1.5 text-xs font-semibold uppercase text-white"
+                  : "rounded-full border border-black/20 px-3 py-1.5 text-xs font-semibold uppercase text-black/60"
               }
               href="/respondent?locale=uk"
             >
@@ -66,8 +66,8 @@ export default async function RespondentPage({
             <Link
               className={
                 locale === "en"
-                  ? "rounded-full bg-uga-dark px-3 py-2 text-xs font-semibold uppercase text-white"
-                  : "rounded-full border border-black/10 px-3 py-2 text-xs font-semibold uppercase text-black/60"
+                  ? "rounded-full bg-uga-dark px-3 py-1.5 text-xs font-semibold uppercase text-white"
+                  : "rounded-full border border-black/20 px-3 py-1.5 text-xs font-semibold uppercase text-black/60"
               }
               href="/respondent?locale=en"
             >
@@ -76,15 +76,15 @@ export default async function RespondentPage({
           </div>
         </div>
 
-        <dl className="mt-6 grid gap-3 rounded-2xl bg-uga-mist p-4 text-sm sm:grid-cols-2">
+        <dl className="mt-5 grid gap-3 border border-black bg-uga-mist p-4 text-sm sm:grid-cols-2">
           <InfoItem label={labels.company} value={data.companyName} />
           <InfoItem label={labels.date} value={data.date} />
           <InfoItem label={labels.basis} value={data.basisLabel} />
-          <InfoItem label={labels.source} value={data.source} />
+          <InfoItem label={labels.unit} value="USD/t" />
         </dl>
 
         {params.saved ? (
-          <div className="mt-5 rounded-2xl border border-uga-green/20 bg-uga-mist px-4 py-3 text-sm font-semibold text-uga-green">
+          <div className="mt-5 border border-uga-green bg-uga-mist px-4 py-3 text-sm font-semibold text-uga-green">
             {params.saved === "submitted"
               ? labels.submitted
               : labels.draftSaved}
@@ -92,13 +92,13 @@ export default async function RespondentPage({
         ) : null}
       </div>
 
-      <form action={save} className="rounded-[1.5rem] border border-black/10 bg-white p-6 shadow-sm">
+      <form action={save} className="border border-black bg-white p-5">
         <input name="date" type="hidden" value={data.date} />
         <input name="locale" type="hidden" value={locale} />
         <div className="grid gap-4">
           {data.commodities.map((commodity) => (
             <label
-              className="grid gap-3 rounded-2xl border border-black/10 p-4 sm:grid-cols-[1fr_12rem] sm:items-center"
+              className="grid gap-3 border-b border-black/10 py-4 last:border-b-0 sm:grid-cols-[1fr_12rem] sm:items-center"
               key={commodity.id}
             >
               <span>
@@ -114,14 +114,12 @@ export default async function RespondentPage({
                   {labels.price}
                 </span>
                 <input
-                  className="rounded-xl border-black/15 px-4 py-3 text-base font-semibold focus:border-uga-green focus:ring-uga-green"
+                  className="border border-black/20 px-3 py-2.5 text-base font-semibold focus:border-uga-green focus:ring-uga-green"
                   defaultValue={commodity.price ?? ""}
                   inputMode="decimal"
-                  min="0"
                   name={`price:${commodity.id}`}
                   placeholder="USD/t"
-                  step="0.01"
-                  type="number"
+                  type="text"
                 />
               </span>
             </label>
@@ -130,7 +128,7 @@ export default async function RespondentPage({
 
         <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-end">
           <button
-            className="rounded-full border border-black/15 px-5 py-3 text-sm font-semibold text-uga-dark transition hover:border-uga-green hover:text-uga-green"
+            className="rounded-[3px] border border-black px-5 py-3 text-sm font-semibold text-uga-dark transition hover:border-uga-green hover:text-uga-green"
             name="intent"
             type="submit"
             value="draft"
@@ -138,7 +136,7 @@ export default async function RespondentPage({
             {labels.saveDraft}
           </button>
           <button
-            className="rounded-full bg-uga-green px-5 py-3 text-sm font-semibold text-white shadow-soft transition hover:bg-uga-dark"
+            className="rounded-[3px] bg-uga-green px-5 py-3 text-sm font-semibold text-white transition hover:bg-uga-dark"
             name="intent"
             type="submit"
             value="submit"
@@ -174,12 +172,12 @@ function SubmittedValues({
   title: string;
 }) {
   return (
-    <section className="rounded-[1.5rem] border border-black/10 bg-white p-6 shadow-sm">
-      <h2 className="text-xl font-semibold tracking-tight">{title}</h2>
+    <section className="border border-black bg-white p-5">
+      <h2 className="text-xl font-black uppercase tracking-normal">{title}</h2>
       <div className="mt-4 grid gap-2">
         {data.commodities.map((commodity) => (
           <div
-            className="flex items-center justify-between gap-4 rounded-xl bg-uga-mist px-4 py-3 text-sm"
+            className="flex items-center justify-between gap-4 border border-black/10 bg-uga-mist px-4 py-3 text-sm"
             key={commodity.id}
           >
             <span className="font-semibold text-uga-dark">{commodity.name}</span>

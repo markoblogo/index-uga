@@ -11,6 +11,20 @@ export function SiteFooter({ locale }: { locale: Locale }) {
     { href: `/${locale}/methodology`, label: dict.nav.methodology },
     { href: `/${locale}/analytics`, label: dict.nav.analytics },
   ];
+  const legalItems = [
+    {
+      href: `/${locale}/privacy`,
+      label: locale === "uk" ? "Політика конфіденційності" : "Privacy Policy",
+    },
+    {
+      href: `/${locale}/terms`,
+      label: locale === "uk" ? "Умови використання" : "Terms of Use",
+    },
+    {
+      href: `/${locale}/risk-disclosure`,
+      label: locale === "uk" ? "Розкриття ризиків" : "Risk Disclosure",
+    },
+  ];
 
   return (
     <footer className="border-t border-black bg-uga-dark text-white">
@@ -58,6 +72,25 @@ export function SiteFooter({ locale }: { locale: Locale }) {
               </Link>
             ))}
           </nav>
+          <div className="mt-4 border-t border-white/20 pt-3">
+            <h3 className="text-[0.65rem] font-black uppercase tracking-[0.16em] text-white/60">
+              {locale === "uk" ? "Правові документи" : "Legal"}
+            </h3>
+            <nav
+              className="mt-2 grid gap-1.5"
+              aria-label={locale === "uk" ? "Правові документи" : "Legal"}
+            >
+              {legalItems.map((item) => (
+                <Link
+                  className="w-fit text-xs font-semibold leading-5 text-white/60 transition hover:text-uga-lime"
+                  href={item.href}
+                  key={item.href}
+                >
+                  {item.label}
+                </Link>
+              ))}
+            </nav>
+          </div>
         </section>
 
         <section>

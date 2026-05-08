@@ -3,16 +3,20 @@ import "server-only";
 import { createHmac, timingSafeEqual } from "node:crypto";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import { respondents } from "@/lib/mock-data";
+import type { DemoAllowlistUser } from "@/lib/demo-allowlist";
 
 export const DEMO_SESSION_COOKIE = "uga_demo_session";
 
 export type DemoRole = "admin" | "respondent" | "member";
 
 export type DemoUser = {
+  userId: string;
+  email: string;
+  name: string;
   username: string;
   role: DemoRole;
   respondentId?: string;
+  companyName?: string;
   respondentName?: string;
   issuedAt: number;
   expiresAt: number;
@@ -38,13 +42,9 @@ export async function getCurrentDemoUser(): Promise<DemoUser | null> {
     return null;
   }
 
-  const respondent = payload.respondentId
-    ? respondents.find(({ id }) => id === payload.respondentId)
-    : undefined;
-
   return {
     ...payload,
-    respondentName: respondent?.legalName,
+    respondentName: payload.companyName,
   };
 }
 
@@ -52,31 +52,26 @@ export async function requireDemoRole(role: DemoRole) {
   const user = await getCurrentDemoUser();
 
   if (!user) {
-    redirect(`/login?next=/${role}`);
+    redirect(`/login?next=${encodeURIComponent(getRoleHome(role))}`);
   }
 
   if (user.role !== role) {
-    redirect(`/${user.role}`);
+    redirect(getRoleHome(user.role));
   }
 
   return user;
 }
 
-export async function setDemoSession({
-  respondentId,
-  role,
-  username,
-}: {
-  respondentId?: string;
-  role: DemoRole;
-  username: string;
-}) {
+export async function setDemoSession(user: DemoAllowlistUser) {
   const now = Math.floor(Date.now() / 1000);
-  const safeUsername = username.trim() || "demo";
   const payload: DemoSessionPayload = {
-    username: safeUsername,
-    role,
-    respondentId: role === "respondent" ? respondentId : undefined,
+    userId: user.userId,
+    email: user.email,
+    name: user.name,
+    username: user.email,
+    role: user.role,
+    respondentId: user.role === "respondent" ? user.respondentId : undefined,
+    companyName: user.role === "respondent" ? user.companyName : undefined,
     issuedAt: now,
     expiresAt: now + SESSION_TTL_SECONDS,
   };
@@ -96,8 +91,16 @@ export async function clearDemoSession() {
   cookieStore.delete(DEMO_SESSION_COOKIE);
 }
 
-export function isDemoRole(value: FormDataEntryValue | null): value is DemoRole {
-  return value === "admin" || value === "respondent" || value === "member";
+export function getRoleHome(role: DemoRole) {
+  if (role === "admin") {
+    return "/admin/daily-inputs";
+  }
+
+  if (role === "respondent") {
+    return "/respondent";
+  }
+
+  return "/member";
 }
 
 function signPayload(payload: DemoSessionPayload) {
@@ -124,6 +127,9 @@ function verifySessionCookie(value: string): DemoSessionPayload | null {
     ) as Partial<DemoSessionPayload>;
 
     if (
+      typeof parsed.userId !== "string" ||
+      typeof parsed.email !== "string" ||
+      typeof parsed.name !== "string" ||
       typeof parsed.username !== "string" ||
       !isStoredRole(parsed.role) ||
       typeof parsed.issuedAt !== "number" ||
@@ -133,11 +139,18 @@ function verifySessionCookie(value: string): DemoSessionPayload | null {
     }
 
     return {
+      userId: parsed.userId,
+      email: parsed.email,
+      name: parsed.name,
       username: parsed.username,
       role: parsed.role,
       respondentId:
         parsed.role === "respondent" && typeof parsed.respondentId === "string"
           ? parsed.respondentId
+          : undefined,
+      companyName:
+        parsed.role === "respondent" && typeof parsed.companyName === "string"
+          ? parsed.companyName
           : undefined,
       issuedAt: parsed.issuedAt,
       expiresAt: parsed.expiresAt,

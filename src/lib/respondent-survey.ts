@@ -40,14 +40,16 @@ const labels = {
     company: "Company",
     date: "Date",
     draftSaved: "Draft saved.",
-    intro: "Enter today's FOB Black Sea prices in USD/t.",
+    intro:
+      "Submit today’s FOB Black Sea price indicatives for your company. Individual submissions are used for index calculation and are not published publicly.",
     price: "Price",
     saveDraft: "Save as draft",
     source: "Source",
     submit: "Submit",
     submitted: "Submitted",
     submittedMessage: "Submitted values",
-    title: "Respondent daily survey",
+    title: "Daily respondent survey",
+    unit: "Unit",
   },
   uk: {
     badge: "Щоденне опитування",
@@ -55,7 +57,8 @@ const labels = {
     company: "Компанія",
     date: "Дата",
     draftSaved: "Чернетку збережено.",
-    intro: "Вкажіть сьогоднішні ціни FOB Black Sea у USD/t.",
+    intro:
+      "Подайте сьогоднішні цінові індикативи FOB Black Sea від вашої компанії. Індивідуальні значення використовуються для розрахунку індексу і не публікуються відкрито.",
     price: "Ціна",
     saveDraft: "Зберегти чернетку",
     source: "Джерело",
@@ -63,6 +66,7 @@ const labels = {
     submitted: "Подано",
     submittedMessage: "Подані значення",
     title: "Щоденна форма респондента",
+    unit: "Одиниця",
   },
 } as const;
 

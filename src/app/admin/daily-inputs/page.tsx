@@ -51,18 +51,18 @@ export default async function DailyInputsPage({
 
   return (
     <section className="grid gap-6">
-      <div className="rounded-[1.5rem] border border-black/10 bg-white p-6 shadow-sm">
+      <div className="border border-black bg-white p-5">
         <div className="grid gap-6 xl:grid-cols-[1fr_auto] xl:items-end">
           <div>
             <p className="text-sm font-semibold uppercase tracking-[0.18em] text-uga-green">
               Admin data entry
             </p>
-            <h1 className="mt-3 text-3xl font-semibold tracking-tight">
-              Daily respondent price matrix
+            <h1 className="mt-3 text-3xl font-black uppercase leading-tight tracking-normal">
+              Daily input matrix
             </h1>
             <p className="mt-3 max-w-3xl text-sm leading-6 text-black/65">
-              Enter or review respondent prices in USD/t for {data.basisLabel}.
-              This page saves source data only; it does not publish the index.
+              Review respondent submissions, enter missing values and compare
+              them with Spike Brokers indicatives before calculation.
             </p>
             <div className="mt-4 flex flex-wrap gap-2 text-xs font-semibold uppercase tracking-[0.12em]">
               <span className="rounded-full bg-uga-mist px-3 py-1 text-uga-green">
@@ -78,14 +78,14 @@ export default async function DailyInputsPage({
             <label className="grid gap-2 text-sm font-semibold text-uga-dark">
               Trade date
               <input
-                className="rounded-xl border-black/15 px-4 py-3 text-base"
+              className="border border-black px-3 py-2 text-base"
                 defaultValue={date}
                 name="date"
                 type="date"
               />
             </label>
             <button
-              className="rounded-full border border-black/15 px-5 py-3 text-sm font-semibold text-uga-dark transition hover:border-uga-green hover:text-uga-green"
+              className="border border-black px-4 py-2 text-sm font-semibold text-uga-dark transition hover:border-uga-green hover:text-uga-green"
               type="submit"
             >
               Load date
@@ -106,7 +106,7 @@ export default async function DailyInputsPage({
 
       <form action={save} className="grid gap-5">
         <input name="date" type="hidden" value={date} />
-        <div className="overflow-hidden rounded-[1.5rem] border border-black/10 bg-white shadow-sm">
+          <div className="overflow-hidden border border-black bg-white">
           <div className="overflow-x-auto">
             <table className="min-w-[1840px] border-collapse text-left">
               <thead className="bg-uga-dark text-white">
@@ -162,13 +162,13 @@ export default async function DailyInputsPage({
           </div>
         </div>
 
-        <div className="flex flex-col gap-3 rounded-[1.5rem] border border-black/10 bg-white p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-col gap-3 border border-black bg-white p-4 sm:flex-row sm:items-center sm:justify-between">
           <p className="text-sm leading-6 text-black/60">
             Saving updates source values and audit entries only. Publication is
             handled from a separate workflow.
           </p>
           <button
-            className="rounded-full bg-uga-green px-5 py-3 text-sm font-semibold text-white shadow-soft transition hover:bg-uga-dark"
+            className="rounded-[3px] bg-uga-green px-5 py-3 text-sm font-semibold text-white transition hover:bg-uga-dark"
             type="submit"
           >
             Save changes
@@ -200,8 +200,8 @@ function MatrixCell({ cell }: { cell: DailyInputCell }) {
           aria-label={`${cell.commodityId} ${cell.respondentId} price`}
           className={
             cell.warning
-              ? "w-full rounded-xl border-red-300 bg-white px-3 py-2 text-sm font-semibold text-uga-dark focus:border-red-500 focus:ring-red-500"
-              : "w-full rounded-xl border-black/15 bg-white px-3 py-2 text-sm font-semibold text-uga-dark focus:border-uga-green focus:ring-uga-green"
+              ? "w-full border border-red-300 bg-white px-3 py-2 text-sm font-semibold text-uga-dark focus:border-red-500 focus:ring-red-500"
+              : "w-full border border-black/20 bg-white px-3 py-2 text-sm font-semibold text-uga-dark focus:border-uga-green focus:ring-uga-green"
           }
           defaultValue={cell.price ?? ""}
           inputMode="decimal"

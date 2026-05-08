@@ -17,7 +17,6 @@ const navByRole = {
   ],
   respondent: [
     { href: "/respondent", label: "Survey form" },
-    { href: "/respondent", label: "My submissions" },
   ],
   member: [
     { href: "/member", label: "Member view" },
@@ -31,7 +30,7 @@ export function InternalShell({ children, user }: InternalShellProps) {
   return (
     <div className="min-h-screen bg-uga-mist text-uga-dark">
       <header className="border-b border-black/10 bg-white">
-        <div className="mx-auto flex max-w-7xl flex-col gap-4 px-6 py-5 lg:flex-row lg:items-center lg:justify-between lg:px-8">
+        <div className="mx-auto flex max-w-7xl flex-col gap-4 px-6 py-4 lg:flex-row lg:items-center lg:justify-between lg:px-8">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
             <Link className="flex w-fit items-center gap-3" href={`/${user.role}`}>
               <Image
@@ -52,7 +51,7 @@ export function InternalShell({ children, user }: InternalShellProps) {
                 </span>
               </div>
               <p className="mt-2 text-sm text-black/60">
-                Signed in as {user.username} · {user.role}
+                Signed in as {user.email} · {user.role}
                 {user.respondentName ? ` · ${user.respondentName}` : ""}
               </p>
             </div>
@@ -74,15 +73,15 @@ export function InternalShell({ children, user }: InternalShellProps) {
         </div>
       </header>
 
-      <div className="mx-auto grid max-w-7xl gap-6 px-6 py-8 lg:grid-cols-[16rem_1fr] lg:px-8">
-        <aside className="rounded-2xl border border-black/10 bg-white p-4 shadow-sm">
+      <div className="mx-auto grid max-w-7xl gap-6 px-6 py-7 lg:grid-cols-[16rem_1fr] lg:px-8">
+        <aside className="border border-black bg-white p-4">
           <p className="px-3 text-xs font-semibold uppercase tracking-[0.16em] text-black/40">
             Navigation
           </p>
           <nav className="mt-3 grid gap-1">
             {navItems.map((item) => (
               <Link
-                className="rounded-xl px-3 py-2 text-sm font-semibold text-black/65 transition hover:bg-uga-mist hover:text-uga-green"
+                className="px-3 py-2 text-sm font-semibold text-black/65 transition hover:bg-uga-mist hover:text-uga-green"
                 href={item.href}
                 key={item.label}
               >
