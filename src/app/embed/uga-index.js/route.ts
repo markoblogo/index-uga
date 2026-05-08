@@ -1,9 +1,6 @@
-import { SITE_CONFIG } from "@/lib/constants";
-
 export const dynamic = "force-dynamic";
 
 export function GET() {
-  const siteUrl = SITE_CONFIG.publicSiteUrl.replace(/\/$/, "");
   const script = `(function () {
   function ready(fn) {
     if (document.readyState === "loading") {
@@ -32,7 +29,8 @@ export function GET() {
       var theme = normalize(script.getAttribute("data-theme"), "light");
       var layout = normalize(script.getAttribute("data-layout"), "cards");
       var height = layout === "compact" ? "320" : "420";
-      var src = "${siteUrl}/embed/cards?locale=" + encodeURIComponent(locale) +
+      var scriptUrl = new URL(script.src, window.location.href);
+      var src = scriptUrl.origin + "/embed/cards?locale=" + encodeURIComponent(locale) +
         "&theme=" + encodeURIComponent(theme) +
         "&layout=" + encodeURIComponent(layout);
       var iframe = document.createElement("iframe");
