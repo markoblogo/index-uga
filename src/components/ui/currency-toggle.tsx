@@ -70,7 +70,7 @@ export function CurrencyValue({
 
   if (currency === "USD") {
     return (
-      <span className={className}>
+      <span className={className} data-currency={currency}>
         {formattedValue}{" "}
         <span className="currency-unit text-sm font-black tracking-normal text-black/55">
           USD/t
@@ -80,7 +80,7 @@ export function CurrencyValue({
   }
 
   return (
-    <span className={`inline-flex flex-col ${className}`}>
+    <span className={`inline-flex flex-col ${className}`} data-currency={currency}>
       <span>
         ≈ {formattedValue}{" "}
         <span className="currency-unit text-sm font-black tracking-normal text-black/55">

@@ -4,6 +4,7 @@ import { getActiveIndexConfig } from "@/lib/index-platform";
 import "./globals.css";
 
 const activeIndex = getActiveIndexConfig();
+const appIcon = activeIndex.id === "spike-ua" ? "/spike-icon.svg" : "/icon.png";
 
 export const metadata: Metadata = {
   title: activeIndex.name,
@@ -12,9 +13,9 @@ export const metadata: Metadata = {
       ? "Daily SPIKE Spot Commodity Index Ukraine for export and processing commodity markets."
       : "Daily spot export price index demo for the Ukrainian Grain Association.",
   icons: {
-    icon: "/icon.png",
-    shortcut: "/icon.png",
-    apple: "/icon.png",
+    icon: appIcon,
+    shortcut: appIcon,
+    apple: appIcon,
   },
   metadataBase: process.env.NEXT_PUBLIC_SITE_URL
     ? new URL(process.env.NEXT_PUBLIC_SITE_URL)

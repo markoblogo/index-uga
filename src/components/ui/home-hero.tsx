@@ -181,7 +181,17 @@ function SpikeHomeHero({
                   key={fact.label}
                 >
                   <p className="text-2xl font-black lowercase leading-none text-white">
-                    {fact.value}
+                    {fact.label === "index" ? (
+                      <span className="inline-flex items-center justify-end gap-2">
+                        <span
+                          aria-hidden="true"
+                          className="h-2.5 w-2.5 rounded-full bg-[var(--spike-accent)] shadow-[0_0_18px_rgba(57,255,20,0.95)]"
+                        />
+                        {fact.value}
+                      </span>
+                    ) : (
+                      fact.value
+                    )}
                   </p>
                   <p className="mt-1 text-[0.58rem] font-black uppercase tracking-[0.18em] text-white/52">
                     {fact.label}
@@ -209,7 +219,7 @@ function SpikeHomeHero({
             </div>
           </div>
 
-          <div className="group flex min-h-[35rem] gap-3 overflow-x-auto pb-2 [scrollbar-width:none] sm:gap-4 lg:min-h-[37rem] xl:overflow-visible">
+          <div className="group flex min-h-[35rem] gap-3 overflow-x-auto pb-2 pt-2 [scrollbar-width:none] sm:gap-4 lg:min-h-[37rem] xl:overflow-visible">
             {commodities.map((commodity) => (
               <SpikeCommodityCard
                 commodity={commodity}
@@ -326,7 +336,7 @@ function SpikeCommodityCard({
 
       <div className="relative z-10 mt-9">
         <CurrencyValue
-          className="block text-[clamp(3.6rem,7vw,6.4rem)] font-black leading-[0.84] tracking-normal text-white [&_.currency-unit]:text-base [&_.currency-unit]:text-white/45"
+          className="block max-w-full overflow-hidden text-[clamp(3.6rem,7vw,6.4rem)] font-black leading-[0.84] tracking-normal text-white data-[currency=EUR]:text-[clamp(3rem,5vw,5.6rem)] data-[currency=UAH]:text-[clamp(2.15rem,3.45vw,4.05rem)] [&_.currency-unit]:text-base [&_.currency-unit]:text-white/45"
           fxRates={fxRates}
           locale={locale}
           officialLabel={officialLabel}
