@@ -202,16 +202,16 @@ function SpikeAboutPage({
           <div className="grid gap-3 md:grid-cols-3">
             {dict.about.whyFeatures.map((feature, index) => (
               <article
-                className="rounded-[1.35rem] border border-white/12 bg-white/[0.055] p-5 transition hover:-translate-y-1 hover:border-[var(--spike-accent)]"
+                className="rounded-[1.35rem] border border-white/12 bg-[#f8f8f2] p-5 text-[#050505] transition hover:-translate-y-1 hover:border-[var(--spike-accent)]"
                 key={feature.title}
               >
                 <span className="text-sm font-black text-[var(--spike-accent)]">
                   {String(index + 1).padStart(2, "0")}
                 </span>
-                <h3 className="mt-8 text-lg font-black uppercase leading-5 text-white">
+                <h3 className="mt-8 text-lg font-black uppercase leading-5 text-[#050505]">
                   {feature.title}
                 </h3>
-                <p className="mt-3 text-sm leading-6 text-white/58">
+                <p className="mt-3 text-sm leading-6 text-black/65">
                   {feature.description}
                 </p>
               </article>
@@ -240,9 +240,9 @@ function SpikeAboutPage({
 
               return (
                 <a
-                  className={`rounded-[1rem] border border-white/10 bg-black px-4 py-4 text-sm font-black text-white/78 transition ${
+                  className={`rounded-[1rem] border border-white/10 bg-[#f8f8f2] px-4 py-4 text-sm font-black text-[#050505] transition ${
                     hasExternalLink
-                      ? "hover:border-[var(--spike-accent)] hover:text-white"
+                      ? "hover:border-[var(--spike-accent)] hover:bg-white"
                       : "pointer-events-none"
                   }`}
                   href={respondentHref}
@@ -250,7 +250,7 @@ function SpikeAboutPage({
                   rel="noopener noreferrer"
                   target="_blank"
                 >
-                  <span className="mb-5 block text-[0.64rem] uppercase tracking-[0.18em] text-white/34">
+                  <span className="mb-5 block text-[0.64rem] uppercase tracking-[0.18em] text-black/38">
                     Partner {String(index + 1).padStart(2, "0")}
                   </span>
                   {respondent.legalName}
