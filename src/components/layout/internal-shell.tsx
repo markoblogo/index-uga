@@ -3,6 +3,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { SITE_CONFIG } from "@/lib/constants";
 import type { DemoUser } from "@/lib/demo-auth";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
 
 type InternalShellProps = {
   children: ReactNode;
@@ -86,6 +87,7 @@ export function InternalShell({ children, user }: InternalShellProps) {
             </div>
           </div>
           <div className="flex flex-wrap items-center gap-2">
+            {!isSpike ? <ThemeToggle /> : null}
             <Link
               className="rounded-full border border-black/10 px-4 py-2 text-sm font-semibold text-black/65 transition hover:border-uga-green hover:text-uga-green"
               href="/"
