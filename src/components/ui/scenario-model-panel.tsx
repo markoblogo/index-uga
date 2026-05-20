@@ -177,6 +177,7 @@ export function ScenarioModelPanel({
       <div className="mt-5">
         <div className="mb-2 flex flex-wrap justify-between gap-3 text-xs font-black uppercase text-black/50">
           <span>{title}</span>
+          <span>{text.modelStatus}</span>
           <span>
             {period} {text.days}
           </span>
@@ -189,6 +190,7 @@ export function ScenarioModelPanel({
         >
           <GridLines />
           <polygon
+            className="scenario-band"
             fill="var(--color-lime)"
             fillOpacity="0.3"
             points={`${toChartPoints(
@@ -205,6 +207,7 @@ export function ScenarioModelPanel({
               .join(" ")}`}
           />
           <polyline
+            className="scenario-line scenario-line-delayed"
             fill="none"
             points={toChartPoints(
               scenario.map((point) => point.upper),
@@ -217,6 +220,7 @@ export function ScenarioModelPanel({
             vectorEffect="non-scaling-stroke"
           />
           <polyline
+            className="scenario-line scenario-line-delayed"
             fill="none"
             points={toChartPoints(
               scenario.map((point) => point.lower),
@@ -229,6 +233,7 @@ export function ScenarioModelPanel({
             vectorEffect="non-scaling-stroke"
           />
           <polyline
+            className="scenario-line"
             fill="none"
             points={toChartPoints(
               scenario.map((point) => point.base),
@@ -246,7 +251,36 @@ export function ScenarioModelPanel({
           <span>{text.baseScenario}</span>
           <span>{text.upperRange}</span>
           <span>{text.lowerRange}</span>
+          <span>{text.aiOption}</span>
         </div>
+        <style jsx>{`
+          .scenario-line {
+            stroke-dasharray: 180;
+            stroke-dashoffset: 180;
+            animation: scenario-draw 1.8s ease-out forwards;
+          }
+
+          .scenario-line-delayed {
+            animation-delay: 0.22s;
+          }
+
+          .scenario-band {
+            opacity: 0;
+            animation: scenario-band 1.2s ease-out 0.55s forwards;
+          }
+
+          @keyframes scenario-draw {
+            to {
+              stroke-dashoffset: 0;
+            }
+          }
+
+          @keyframes scenario-band {
+            to {
+              opacity: 1;
+            }
+          }
+        `}</style>
       </div>
     </article>
   );
@@ -353,12 +387,14 @@ function getCopy(locale: Locale) {
   if (locale === "uk") {
     return {
       baseScenario: "Базовий сценарій",
+      aiOption: "AI-модель: опція підписки",
       commodityLabel: "Культура",
       commodityMode: "Культура",
       days: "днів",
       description:
         "Оберіть культуру або конкретний спред і горизонт, щоб побудувати сценарний діапазон.",
       lowerRange: "Нижній діапазон",
+      modelStatus: "ШІ-модель активна · демо-розрахунок",
       spreadLabel: "Конкретний спред",
       spreadMode: "Спред",
       title: "Модельний сценарій",
@@ -368,12 +404,14 @@ function getCopy(locale: Locale) {
 
   return {
     baseScenario: "Base scenario",
+    aiOption: "AI model: subscription option",
     commodityLabel: "Commodity",
     commodityMode: "Commodity",
     days: "days",
     description:
       "Choose a commodity or specific spread and horizon to draw the scenario range.",
     lowerRange: "Lower range",
+    modelStatus: "AI model active · demo run",
     spreadLabel: "Specific spread",
     spreadMode: "Spread",
     title: "Model scenario",

@@ -31,6 +31,10 @@ export default async function SubscriptionPage({
         <AccessNotice copy={copy} />
       </section>
 
+      <section className="mx-auto max-w-7xl px-6 pb-10 lg:px-8">
+        <SubscriptionTiers copy={copy} />
+      </section>
+
       <section className="border-y border-black bg-uga-mist">
         <div className="mx-auto grid max-w-7xl gap-5 px-6 py-10 lg:grid-cols-[1fr_1fr] lg:px-8 lg:py-12">
           <ApiPanel copy={copy} />
@@ -38,6 +42,36 @@ export default async function SubscriptionPage({
         </div>
       </section>
     </>
+  );
+}
+
+function SubscriptionTiers({ copy }: { copy: SubscriptionCopy }) {
+  return (
+    <div className="grid gap-5 lg:grid-cols-2">
+      {copy.tiers.map((tier) => (
+        <article className="border border-black bg-white p-5" key={tier.title}>
+          <p className="text-xs font-black uppercase tracking-[0.18em] text-uga-green">
+            {tier.eyebrow}
+          </p>
+          <h2 className="mt-3 text-2xl font-black uppercase text-black">
+            {tier.title}
+          </h2>
+          <p className="mt-3 text-sm leading-6 text-black/65">
+            {tier.description}
+          </p>
+          <div className="mt-4 grid border border-black">
+            {tier.features.map((feature) => (
+              <div
+                className="border-b border-black px-3 py-2 text-sm font-black text-black last:border-b-0"
+                key={feature}
+              >
+                {feature}
+              </div>
+            ))}
+          </div>
+        </article>
+      ))}
+    </div>
   );
 }
 
@@ -167,6 +201,32 @@ function getSubscriptionCopy(locale: Locale) {
         "У цьому розділі зібрані майбутні формати співпраці, підписки, API-доступу та розширеної аналітики UGA Index.",
       eyebrow: "Співпраця",
       previewLabel: "Попередній доступ",
+      tiers: [
+        {
+          description:
+            "Базовий рівень для користувачів, яким потрібна історія індексів, таблиці, спреди та стандартна аналітика без сценарного моделювання.",
+          eyebrow: "Підписка",
+          features: [
+            "Повна історія опублікованих індексів",
+            "Аналітика динаміки та волатильності",
+            "Спреди та цінові діапазони",
+            "Експорт даних і API за планом доступу",
+          ],
+          title: "Аналітика без AI-моделі",
+        },
+        {
+          description:
+            "Розширений рівень для сценарного моделювання культур і спредів із демонстраційною AI-моделлю, яка будує можливі діапазони руху.",
+          eyebrow: "AI option",
+          features: [
+            "AI-сценарії за культурою",
+            "AI-сценарії за конкретним спредом",
+            "Горизонти 30 / 60 / 90 / 180 днів",
+            "Сценарний діапазон: базовий, верхній і нижній",
+          ],
+          title: "Аналітика з AI-моделлю",
+        },
+      ],
       title: "Співпраця та підписка",
     };
 
@@ -214,6 +274,32 @@ function getSubscriptionCopy(locale: Locale) {
       "This section collects future cooperation formats, subscription access, API access, and extended UGA Index analytics options.",
     eyebrow: "Cooperation",
     previewLabel: "Preview access",
+    tiers: [
+      {
+        description:
+          "Base level for users who need index history, tables, spreads and standard analytics without scenario modelling.",
+        eyebrow: "Subscription",
+        features: [
+          "Full published index history",
+          "Trend and volatility analytics",
+          "Spreads and price ranges",
+          "Data export and API by access plan",
+        ],
+        title: "Analytics without AI model",
+      },
+      {
+        description:
+          "Extended level for scenario modelling by commodity and spread with a demo AI model that draws possible movement ranges.",
+        eyebrow: "AI option",
+        features: [
+          "AI scenarios by commodity",
+          "AI scenarios by specific spread",
+          "30 / 60 / 90 / 180-day horizons",
+          "Scenario range: base, upper and lower",
+        ],
+        title: "Analytics with AI model",
+      },
+    ],
     title: "Cooperation and subscription",
   };
 
