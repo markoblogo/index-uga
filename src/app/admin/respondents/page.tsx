@@ -139,241 +139,310 @@ function SurveyNotificationSettings() {
 
 function AddRespondentPanel() {
   return (
-    <form action={addRespondentAction} className="border border-black bg-white p-4">
-      <div className="grid gap-4 lg:grid-cols-[1.4fr_0.7fr_0.9fr]">
-        <Field label="Company">
-          <input
-            className="admin-field"
-            name="companyName"
-            placeholder="ТОВ «Новий респондент»"
-            required
-          />
-        </Field>
-        <Field label="Status">
-          <select className="admin-field" name="status" defaultValue="active">
-            <option value="active">active</option>
-            <option value="pending">pending</option>
-          </select>
-        </Field>
-        <Field label="Collection">
-          <select
-            className="admin-field"
-            name="collectionMode"
-            defaultValue="self_service"
-          >
-            <option value="self_service">fills site form</option>
-            <option value="manual_outreach">email/call required</option>
-          </select>
-        </Field>
-      </div>
-      <div className="mt-4 grid gap-4 lg:grid-cols-4">
-        <Field label="Contact person">
-          <input className="admin-field" name="contactName" required />
-        </Field>
-        <Field label="Role">
-          <input
-            className="admin-field"
-            name="contactRole"
-            placeholder="Primary contact"
-          />
-        </Field>
-        <Field label="Phone">
-          <input className="admin-field" name="contactPhone" />
-        </Field>
-        <Field label="Notification email">
-          <input className="admin-field" name="contactEmail" type="email" />
-        </Field>
-      </div>
-      <button className="mt-4 border border-black bg-uga-dark px-4 py-2 text-sm font-black uppercase tracking-[0.12em] text-white">
-        Add respondent
-      </button>
-    </form>
+    <details className="group border border-black bg-white [&_summary::-webkit-details-marker]:hidden">
+      <summary className="grid cursor-pointer gap-3 px-4 py-3 lg:grid-cols-[1fr_auto] lg:items-center">
+        <div>
+          <p className="text-[0.68rem] font-black uppercase tracking-[0.16em] text-uga-green">
+            New respondent
+          </p>
+          <h2 className="mt-1 text-lg font-black uppercase leading-5">
+            Add company to respondent directory
+          </h2>
+        </div>
+        <span className="inline-flex border border-black bg-uga-dark px-3 py-2 text-xs font-black uppercase tracking-[0.12em] text-white">
+          <span className="group-open:hidden">Open form</span>
+          <span className="hidden group-open:inline">Close form</span>
+        </span>
+      </summary>
+      <form action={addRespondentAction} className="border-t border-black p-4">
+        <div className="grid gap-3 lg:grid-cols-[1.5fr_0.7fr_0.95fr]">
+          <Field label="Company">
+            <input
+              className="admin-field"
+              name="companyName"
+              placeholder="ТОВ «Новий респондент»"
+              required
+            />
+          </Field>
+          <Field label="Status">
+            <select className="admin-field" name="status" defaultValue="active">
+              <option value="active">active</option>
+              <option value="pending">pending</option>
+            </select>
+          </Field>
+          <Field label="Collection">
+            <select
+              className="admin-field"
+              name="collectionMode"
+              defaultValue="self_service"
+            >
+              <option value="self_service">fills site form</option>
+              <option value="manual_outreach">email/call required</option>
+            </select>
+          </Field>
+        </div>
+        <div className="mt-3 grid gap-3 lg:grid-cols-4">
+          <Field label="Contact person">
+            <input className="admin-field" name="contactName" required />
+          </Field>
+          <Field label="Role">
+            <input
+              className="admin-field"
+              name="contactRole"
+              placeholder="Primary contact"
+            />
+          </Field>
+          <Field label="Phone">
+            <input className="admin-field" name="contactPhone" />
+          </Field>
+          <Field label="Notification email">
+            <input className="admin-field" name="contactEmail" type="email" />
+          </Field>
+        </div>
+        <button className="mt-3 border border-black bg-uga-dark px-4 py-2 text-sm font-black uppercase tracking-[0.12em] text-white">
+          Add respondent
+        </button>
+      </form>
+    </details>
   );
 }
 
 function RespondentPanel({ respondent }: { respondent: RespondentDirectoryEntry }) {
-  return (
-    <article className="border border-black bg-white">
-      <div className="border-b border-black bg-uga-dark px-4 py-3 text-white">
-        <div className="grid gap-3 lg:grid-cols-[1fr_auto] lg:items-center">
-          <div>
-            <h2 className="text-lg font-black leading-6">
-              {respondent.companyName}
-            </h2>
-            <p className="mt-1 text-[0.68rem] font-black uppercase tracking-[0.16em] text-white/55">
-              {respondent.id}
-            </p>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            <StatusPill tone={respondent.status === "active" ? "active" : "muted"}>
-              {respondent.status}
-            </StatusPill>
-            <StatusPill
-              tone={
-                respondent.collectionMode === "self_service"
-                  ? "active"
-                  : "warning"
-              }
-            >
-              {respondent.collectionMode === "self_service"
-                ? "fills site form"
-                : "email/call required"}
-            </StatusPill>
-          </div>
-        </div>
-      </div>
+  const primaryContact =
+    respondent.contacts.find((contact) => contact.primary) ??
+    respondent.contacts[0];
 
-      <div className="grid gap-5 p-4 xl:grid-cols-[22rem_1fr]">
-        <div>
-          <form action={updateRespondentAction} className="grid gap-3">
-            <input name="id" type="hidden" value={respondent.id} />
-            <Field label="Company name">
-              <input
-                className="admin-field"
-                defaultValue={respondent.companyName}
-                name="companyName"
-                required
-              />
-            </Field>
-            <Field label="Status">
-              <select
-                className="admin-field"
-                defaultValue={respondent.status}
-                name="status"
-              >
-                <option value="active">active</option>
-                <option value="pending">pending</option>
-              </select>
-            </Field>
-            <Field label="Collection mode">
-              <select
-                className="admin-field"
-                defaultValue={respondent.collectionMode}
-                name="collectionMode"
-              >
-                <option value="self_service">fills site form</option>
-                <option value="manual_outreach">email/call required</option>
-              </select>
-            </Field>
-            <div className="flex flex-wrap gap-2 pt-1">
+  return (
+    <details className="group border border-black bg-white [&_summary::-webkit-details-marker]:hidden">
+      <summary className="grid cursor-pointer gap-3 px-4 py-3 transition hover:bg-uga-mist/70 lg:grid-cols-[minmax(18rem,1.4fr)_minmax(12rem,0.85fr)_minmax(15rem,1fr)_auto] lg:items-center">
+        <div className="min-w-0">
+          <h2 className="truncate text-base font-black leading-5">
+            {respondent.companyName}
+          </h2>
+          <p className="mt-1 truncate text-[0.66rem] font-black uppercase tracking-[0.14em] text-black/45">
+            {respondent.id}
+          </p>
+        </div>
+        <div className="min-w-0 text-sm font-semibold">
+          <p className="truncate">{primaryContact?.name ?? "No contact"}</p>
+          <p className="mt-0.5 truncate text-xs text-black/55">
+            {primaryContact?.phone || primaryContact?.email || "No contact data"}
+          </p>
+        </div>
+        <div className="min-w-0 text-sm font-semibold">
+          <p className="truncate">{respondent.auth.loginEmail}</p>
+          <p className="mt-0.5 truncate text-xs text-black/55">
+            {respondent.contacts.length} contact
+            {respondent.contacts.length === 1 ? "" : "s"} ·{" "}
+            {respondent.auth.passwordSetupStatus === "temporary"
+              ? "temporary password"
+              : "password set"}
+          </p>
+        </div>
+        <div className="flex flex-wrap items-center gap-2 lg:justify-end">
+          <StatusPill tone={respondent.status === "active" ? "active" : "muted"}>
+            {respondent.status}
+          </StatusPill>
+          <StatusPill
+            tone={
+              respondent.collectionMode === "self_service" ? "active" : "warning"
+            }
+          >
+            {respondent.collectionMode === "self_service" ? "site form" : "manual"}
+          </StatusPill>
+          <span className="border border-black px-2 py-1 text-[0.66rem] font-black uppercase tracking-[0.12em] text-black/55">
+            <span className="group-open:hidden">Edit</span>
+            <span className="hidden group-open:inline">Close</span>
+          </span>
+        </div>
+      </summary>
+
+      <div className="border-t border-black bg-uga-mist/45 p-4">
+        <div className="grid gap-4 xl:grid-cols-[minmax(18rem,0.85fr)_minmax(20rem,1fr)_minmax(18rem,0.9fr)]">
+          <section className="border border-black/20 bg-white p-3">
+            <p className="mb-3 text-[0.68rem] font-black uppercase tracking-[0.16em] text-black/45">
+              Company settings
+            </p>
+            <form action={updateRespondentAction} className="grid gap-3">
+              <input name="id" type="hidden" value={respondent.id} />
+              <Field label="Company name">
+                <input
+                  className="admin-field"
+                  defaultValue={respondent.companyName}
+                  name="companyName"
+                  required
+                />
+              </Field>
+              <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-1">
+                <Field label="Status">
+                  <select
+                    className="admin-field"
+                    defaultValue={respondent.status}
+                    name="status"
+                  >
+                    <option value="active">active</option>
+                    <option value="pending">pending</option>
+                  </select>
+                </Field>
+                <Field label="Collection mode">
+                  <select
+                    className="admin-field"
+                    defaultValue={respondent.collectionMode}
+                    name="collectionMode"
+                  >
+                    <option value="self_service">fills site form</option>
+                    <option value="manual_outreach">email/call required</option>
+                  </select>
+                </Field>
+              </div>
               <button className="border border-black bg-uga-green px-3 py-2 text-xs font-black uppercase tracking-[0.12em] text-white">
                 Save company
               </button>
+            </form>
+            <form action={deleteRespondentAction} className="mt-2">
+              <input name="id" type="hidden" value={respondent.id} />
+              <button className="border border-red-700 px-3 py-2 text-xs font-black uppercase tracking-[0.12em] text-red-700">
+                Delete respondent
+              </button>
+            </form>
+          </section>
+
+          <section className="border border-black/20 bg-white p-3">
+            <p className="mb-3 text-[0.68rem] font-black uppercase tracking-[0.16em] text-black/45">
+              Contact people
+            </p>
+            <div className="grid gap-2">
+              {respondent.contacts.map((contact) => (
+                <ContactEditor
+                  contact={contact}
+                  contactCount={respondent.contacts.length}
+                  key={contact.id}
+                  respondentId={respondent.id}
+                />
+              ))}
             </div>
-          </form>
-          <form action={deleteRespondentAction} className="mt-2">
-            <input name="id" type="hidden" value={respondent.id} />
-            <button className="border border-red-700 px-3 py-2 text-xs font-black uppercase tracking-[0.12em] text-red-700">
-              Delete respondent
-            </button>
-          </form>
+            <AddContactForm respondentId={respondent.id} />
+          </section>
 
           <RespondentAuthPanel respondent={respondent} />
         </div>
-
-        <div className="grid gap-3">
-          <p className="text-[0.68rem] font-black uppercase tracking-[0.16em] text-black/45">
-            Contact people
-          </p>
-          {respondent.contacts.map((contact) => (
-            <div
-              className="grid gap-3 border border-black/15 p-3 lg:grid-cols-[1fr_1fr_auto]"
-              key={contact.id}
-            >
-              <form
-                action={updateContactAction}
-                className="contents"
-                id={`contact-${contact.id}`}
-              >
-                <input name="respondentId" type="hidden" value={respondent.id} />
-                <input name="contactId" type="hidden" value={contact.id} />
-                <Field label="Name / role">
-                  <input
-                    className="admin-field"
-                    defaultValue={contact.name}
-                    name="name"
-                    required
-                  />
-                  <input
-                    className="admin-field mt-2"
-                    defaultValue={contact.role}
-                    name="role"
-                  />
-                </Field>
-                <Field label="Phone / email">
-                  <input
-                    className="admin-field"
-                    defaultValue={contact.phone}
-                    name="phone"
-                  />
-                  <input
-                    className="admin-field mt-2"
-                    defaultValue={contact.email}
-                    name="email"
-                    type="email"
-                  />
-                </Field>
-                <div className="flex flex-col items-start gap-2">
-                  <label className="inline-flex items-center gap-2 text-xs font-black uppercase tracking-[0.1em] text-black/55">
-                    <input
-                      className="h-4 w-4 accent-uga-green"
-                      defaultChecked={contact.primary}
-                      name="primary"
-                      type="checkbox"
-                      value="true"
-                    />
-                    primary
-                  </label>
-                  <button className="border border-black bg-white px-3 py-2 text-xs font-black uppercase tracking-[0.12em] text-black">
-                    Save
-                  </button>
-                </div>
-              </form>
-              <form action={deleteContactAction} className="lg:col-span-3">
-                <input name="respondentId" type="hidden" value={respondent.id} />
-                <input name="contactId" type="hidden" value={contact.id} />
-                <button
-                  className="text-xs font-black uppercase tracking-[0.12em] text-red-700"
-                  disabled={respondent.contacts.length <= 1}
-                >
-                  Delete contact
-                </button>
-              </form>
-            </div>
-          ))}
-
-          <form action={addContactAction} className="border border-black/25 p-3">
-            <input name="respondentId" type="hidden" value={respondent.id} />
-            <div className="grid gap-3 lg:grid-cols-4">
-              <Field label="New contact">
-                <input className="admin-field" name="name" required />
-              </Field>
-              <Field label="Role">
-                <input className="admin-field" name="role" />
-              </Field>
-              <Field label="Phone">
-                <input className="admin-field" name="phone" />
-              </Field>
-              <Field label="Email">
-                <input className="admin-field" name="email" type="email" />
-              </Field>
-            </div>
-            <label className="mt-3 inline-flex items-center gap-2 text-xs font-black uppercase tracking-[0.1em] text-black/55">
-              <input
-                className="h-4 w-4 accent-uga-green"
-                name="primary"
-                type="checkbox"
-                value="true"
-              />
-              make primary contact
-            </label>
-            <button className="ml-3 border border-black bg-uga-dark px-3 py-2 text-xs font-black uppercase tracking-[0.12em] text-white">
-              Add contact
-            </button>
-          </form>
-        </div>
       </div>
-    </article>
+    </details>
+  );
+}
+
+function ContactEditor({
+  contact,
+  contactCount,
+  respondentId,
+}: {
+  contact: RespondentDirectoryEntry["contacts"][number];
+  contactCount: number;
+  respondentId: string;
+}) {
+  return (
+    <div className="border border-black/15 p-3">
+      <form
+        action={updateContactAction}
+        className="grid gap-2 lg:grid-cols-[1fr_0.9fr_auto]"
+      >
+        <input name="respondentId" type="hidden" value={respondentId} />
+        <input name="contactId" type="hidden" value={contact.id} />
+        <div className="grid gap-2 sm:grid-cols-2 lg:col-span-2">
+          <Field label="Name">
+            <input
+              className="admin-field"
+              defaultValue={contact.name}
+              name="name"
+              required
+            />
+          </Field>
+          <Field label="Role">
+            <input
+              className="admin-field"
+              defaultValue={contact.role}
+              name="role"
+            />
+          </Field>
+          <Field label="Phone">
+            <input
+              className="admin-field"
+              defaultValue={contact.phone}
+              name="phone"
+            />
+          </Field>
+          <Field label="Email">
+            <input
+              className="admin-field"
+              defaultValue={contact.email}
+              name="email"
+              type="email"
+            />
+          </Field>
+        </div>
+        <div className="flex flex-wrap items-end gap-2 lg:flex-col lg:items-start">
+          <label className="inline-flex items-center gap-2 text-xs font-black uppercase tracking-[0.1em] text-black/55">
+            <input
+              className="h-4 w-4 accent-uga-green"
+              defaultChecked={contact.primary}
+              name="primary"
+              type="checkbox"
+              value="true"
+            />
+            primary
+          </label>
+          <button className="border border-black bg-white px-3 py-2 text-xs font-black uppercase tracking-[0.12em] text-black">
+            Save
+          </button>
+        </div>
+      </form>
+      <form action={deleteContactAction} className="mt-2">
+        <input name="respondentId" type="hidden" value={respondentId} />
+        <input name="contactId" type="hidden" value={contact.id} />
+        <button
+          className="text-xs font-black uppercase tracking-[0.12em] text-red-700 disabled:text-black/35"
+          disabled={contactCount <= 1}
+        >
+          Delete contact
+        </button>
+      </form>
+    </div>
+  );
+}
+
+function AddContactForm({ respondentId }: { respondentId: string }) {
+  return (
+    <form action={addContactAction} className="mt-3 border border-black/25 p-3">
+      <input name="respondentId" type="hidden" value={respondentId} />
+      <div className="grid gap-2 sm:grid-cols-2">
+        <Field label="New contact">
+          <input className="admin-field" name="name" required />
+        </Field>
+        <Field label="Role">
+          <input className="admin-field" name="role" />
+        </Field>
+        <Field label="Phone">
+          <input className="admin-field" name="phone" />
+        </Field>
+        <Field label="Email">
+          <input className="admin-field" name="email" type="email" />
+        </Field>
+      </div>
+      <div className="mt-3 flex flex-wrap items-center gap-3">
+        <label className="inline-flex items-center gap-2 text-xs font-black uppercase tracking-[0.1em] text-black/55">
+          <input
+            className="h-4 w-4 accent-uga-green"
+            name="primary"
+            type="checkbox"
+            value="true"
+          />
+          make primary
+        </label>
+        <button className="border border-black bg-uga-dark px-3 py-2 text-xs font-black uppercase tracking-[0.12em] text-white">
+          Add contact
+        </button>
+      </div>
+    </form>
   );
 }
 
@@ -383,7 +452,7 @@ function RespondentAuthPanel({
   respondent: RespondentDirectoryEntry;
 }) {
   return (
-    <div className="mt-4 border border-black/25 bg-uga-mist p-3">
+    <section className="border border-black/20 bg-white p-3">
       <p className="text-[0.68rem] font-black uppercase tracking-[0.16em] text-black/45">
         Respondent login
       </p>
@@ -412,7 +481,7 @@ function RespondentAuthPanel({
         </button>
       </form>
 
-      <div className="mt-3 border border-black/15 bg-white p-3">
+      <div className="mt-3 border border-black/15 bg-uga-mist p-3">
         <p className="text-[0.68rem] font-black uppercase tracking-[0.14em] text-black/45">
           Temporary password
         </p>
@@ -429,7 +498,7 @@ function RespondentAuthPanel({
           </button>
         </form>
       </div>
-    </div>
+    </section>
   );
 }
 
