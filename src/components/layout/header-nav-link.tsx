@@ -21,7 +21,7 @@ export function HeaderNavLink({ href, isSpike, label }: HeaderNavLinkProps) {
     : "text-black/65 after:scale-x-0 after:bg-uga-lime hover:text-uga-green";
   const activeClass = isSpike
     ? "text-white after:scale-x-100 after:bg-white"
-    : "text-uga-dark after:scale-x-100 after:bg-uga-lime";
+    : "text-black after:scale-x-100 after:bg-uga-lime";
 
   return (
     <Link
