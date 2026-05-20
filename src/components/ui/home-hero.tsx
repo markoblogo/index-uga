@@ -434,7 +434,7 @@ function HeroIndexBoard({
             {currentValues}
           </h2>
           <p className="mt-2 text-[0.68rem] font-black uppercase leading-5 tracking-normal text-black/50">
-            {updatedLabel}: {updatedAt} · {SITE_CONFIG.defaultDeliveryBasis} ·{" "}
+            {updatedLabel}: {updatedAt} · {SITE_CONFIG.heroDeliveryBasis} ·{" "}
             {SITE_CONFIG.defaultDeliveryPeriod} · {fxLabel}:{" "}
             {formatFxSource(fxRates.source, locale)} USD/UAH{" "}
             {fxRates.usdUah.toFixed(2)}, EUR/UAH {fxRates.eurUah.toFixed(2)}
@@ -577,5 +577,5 @@ function formatFxSource(source: FxRates["source"], locale: Locale) {
     return "НБУ";
   }
 
-  return source === "demo" ? "demo FX" : source;
+  return source === "demo" ? "FX fallback" : source;
 }

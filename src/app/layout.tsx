@@ -11,7 +11,7 @@ export const metadata: Metadata = {
   description:
     activeIndex.id === "spike-ua"
       ? "Daily SPIKE Spot Commodity Index Ukraine for export and processing commodity markets."
-      : "Daily spot export price index demo for the Ukrainian Grain Association.",
+      : "Daily spot export price index for the Ukrainian Grain Association.",
   icons: {
     icon: appIcon,
     shortcut: appIcon,

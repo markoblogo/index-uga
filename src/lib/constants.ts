@@ -6,6 +6,7 @@ export const SITE_CONFIG = {
   name: activeIndex.name,
   publicSiteUrl: activeIndex.publicSiteUrl,
   defaultDeliveryBasis: activeIndex.defaultDeliveryBasis,
+  heroDeliveryBasis: activeIndex.heroDeliveryBasis ?? activeIndex.defaultDeliveryBasis,
   defaultDeliveryPeriod: activeIndex.defaultDeliveryPeriod,
   currency: activeIndex.currency,
   unit: activeIndex.unit,

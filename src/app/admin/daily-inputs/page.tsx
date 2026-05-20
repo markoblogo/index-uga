@@ -103,7 +103,7 @@ export default async function DailyInputsPage({
             {params.saved === "database"
               ? "Changes saved to the database and audit log entries were created."
               : params.saved === "mock"
-                ? "Demo save accepted. Configure DATABASE_URL to persist changes and audit logs."
+                ? "Changes saved for the current session. Configure DATABASE_URL to persist changes and audit logs."
                 : "No valid prices were submitted."}
           </div>
         ) : null}

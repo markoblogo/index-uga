@@ -76,7 +76,7 @@ export function InternalShell({ children, user }: InternalShellProps) {
             <div>
               <div className="flex flex-wrap items-center gap-3">
                 <span className="rounded-full bg-uga-green px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-white">
-                  Demo mode
+                  Preview mode
                 </span>
               </div>
               <p className="mt-2 text-sm text-black/60">

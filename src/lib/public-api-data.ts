@@ -1,5 +1,6 @@
 import { db } from "@/lib/db";
 import { hasDatabaseUrl } from "@/lib/admin-daily-inputs";
+import { SITE_CONFIG } from "@/lib/constants";
 import {
   commodities,
   latestQuotes,
@@ -107,7 +108,7 @@ function getMockHistoryData(): PublicHistoryItem[] {
         commodityNameUk: commodity.name.uk,
         commodityNameEn: commodity.name.en,
         date: demoDates[index],
-        basis: "FOB Black Sea",
+        basis: SITE_CONFIG.defaultDeliveryBasis,
         valueUsdPerMt: value,
         changeAbs,
         changePct:
@@ -157,7 +158,7 @@ async function getDatabaseLatestData(): Promise<PublicLatestItem[]> {
         commodityNameUk: commodity.nameUk,
         commodityNameEn: commodity.nameEn,
         date: published.tradeDate.toISOString().slice(0, 10),
-        basis: basis.name,
+        basis: SITE_CONFIG.defaultDeliveryBasis,
         valueUsdPerMt: published.valueUsdPerMt.toNumber(),
         changeAbs: published.changeAbsUsdPerMt?.toNumber() ?? 0,
         changePct: published.changePct?.toNumber() ?? 0,
@@ -197,7 +198,7 @@ async function getDatabaseHistoryData(): Promise<PublicHistoryItem[]> {
     commodityNameUk: row.commodity.nameUk,
     commodityNameEn: row.commodity.nameEn,
     date: row.tradeDate.toISOString().slice(0, 10),
-    basis: basis.name,
+    basis: SITE_CONFIG.defaultDeliveryBasis,
     valueUsdPerMt: row.valueUsdPerMt.toNumber(),
     changeAbs: row.changeAbsUsdPerMt?.toNumber() ?? 0,
     changePct: row.changePct?.toNumber() ?? 0,

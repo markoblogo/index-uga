@@ -280,7 +280,7 @@ async function saveDatabaseDailyInputs(
   });
 
   if (!basis) {
-    throw new Error("FOB Black Sea delivery basis is not seeded.");
+    throw new Error("CPT UA Black Sea delivery basis is not seeded.");
   }
 
   for (const entry of entries) {

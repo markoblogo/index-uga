@@ -8,7 +8,7 @@ export default function MemberPage() {
         Published index access
       </h1>
       <p className="mt-4 max-w-2xl text-sm leading-6 text-black/65">
-        This protected demo area is reserved for member users. Future screens
+        This protected area is reserved for member users. Future screens
         will show published UGA Index values and member-only analytics.
       </p>
     </section>

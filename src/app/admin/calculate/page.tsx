@@ -30,10 +30,10 @@ const statusClasses: Record<IndexCalculationStatus, string> = {
 
 const noticeText: Record<string, string> = {
   recalculated_mock:
-    "Demo recalculation completed. Configure DATABASE_URL to persist calculation rows.",
+    "Recalculation completed for the current session. Configure DATABASE_URL to persist calculation rows.",
   recalculated_database: "Calculations saved with new version numbers.",
   published_mock:
-    "Publish action completed in demo mode. Published values are locked in the current dev session.",
+    "Publish action completed. Published values are locked in the current dev session.",
   published_database:
     "Publish action completed. PublishedIndex rows, changes, locks, and audit logs were created.",
 };
@@ -125,7 +125,7 @@ export default async function AdminCalculatePage({
             are not published automatically.
           </p>
           <p className="font-semibold text-uga-dark">
-            Independent verification: demo placeholder. In production, the
+            Independent verification step. In production, the
             final calculation version should be reviewed before publication.
           </p>
         </div>
@@ -230,7 +230,7 @@ function CalculationPanel({
             <Row label="Delivery period" value={SITE_CONFIG.defaultDeliveryPeriod} />
             <Row label="Pre-publication version" value={`v${commodity.version}`} />
             <Row
-              label="Demo status"
+              label="Review status"
               value={
                 commodity.status === "publishable"
                   ? "ready for partner review"

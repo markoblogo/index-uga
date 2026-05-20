@@ -1030,7 +1030,7 @@ function getAnalyticsCopy(locale: Locale) {
       scenarioChartDescription:
         "90-денний горизонт із базовим сценарієм і верхнім/нижнім діапазоном.",
       scenarioDisclaimer:
-        "Сценарні результати сформовані лише для аналітичної демонстрації. Вони не є інвестиційною порадою, торговою рекомендацією або гарантованим прогнозом. Фактичні ринкові ціни можуть суттєво відрізнятися.",
+        "Сценарні результати сформовані лише для аналітичного попереднього перегляду. Вони не є інвестиційною порадою, торговою рекомендацією або гарантованим прогнозом. Фактичні ринкові ціни можуть суттєво відрізнятися.",
       scenarioEyebrow: "Модельний сценарій",
       scenarioTitle: "AI-сценарій динаміки індексів",
       spreadDescription:
@@ -1149,7 +1149,7 @@ function getAnalyticsCopy(locale: Locale) {
     scenarioChartDescription:
       "90-day horizon with a base scenario and upper/lower range.",
     scenarioDisclaimer:
-      "Scenario outputs are generated for analytical demonstration only. They are not investment advice, trading recommendations or guaranteed forecasts. Actual market prices may differ materially.",
+      "Scenario outputs are generated for analytical preview only. They are not investment advice, trading recommendations or guaranteed forecasts. Actual market prices may differ materially.",
     scenarioEyebrow: "Model scenario",
     scenarioTitle: "AI-assisted scenario forecast",
     spreadDescription:

@@ -155,13 +155,13 @@ const dictionaries: Record<Locale, Dictionary> = {
       partnerLine: "UGA · Spike Brokers · Cropto/MN7R",
       title: "UGA Index",
       description:
-        "Щоденний індекс експортних спотових цін України для ключових зернових та олійних культур на базисі FOB Black Sea.",
+        "Щоденний індекс експортних спотових цін України для ключових зернових та олійних культур на базисі CPT Black Sea Panamax Ports (POC).",
       boardTitle: "UGA Index / Експортні ціни",
       boardDescription:
-        "Ринковий бенчмарк справедливих експортних цін України у USD/t. FOB Black Sea, T+30, щоденна публікація після EOD-перевірки.",
+        "Ринковий бенчмарк справедливих експортних цін України у USD/t. CPT Black Sea Panamax Ports (POC), T+30, щоденна публікація після EOD-перевірки.",
       heroSubtitle:
-        "Щоденні значення для ключових зернових та олійних культур України на базисі FOB Black Sea.",
-      heroMeta: "FOB Чорне море · T+30 · USD/т · публікація після EOD-перевірки",
+        "Щоденні значення для ключових зернових та олійних культур України на базисі CPT Black Sea Panamax Ports (POC).",
+      heroMeta: "CPT Black Sea Panamax Ports (POC) · T+30 · USD/т · публікація після EOD-перевірки",
       heroAttribution:
         "Публікується УЗА. Ринкові індикативи: Spike Brokers. Технологія: Cropto/MN7R.",
       heroAttributionShort: "UGA · Spike Brokers · Cropto/MN7R",
@@ -173,13 +173,13 @@ const dictionaries: Record<Locale, Dictionary> = {
       selectorTitle: "Культури",
       reportTitle: "Завантажити звіт",
       reportDescription:
-        "Демо-експорт денного пакета індексу для презентації та внутрішнього огляду.",
-      reportAction: "PDF / Excel демо",
+        "Експорт денного пакета індексу для презентації та внутрішнього огляду.",
+      reportAction: "PDF / Excel",
       statusLabel: "Статус оновлення",
       updatedLabel: "Оновлено",
       basisLabel: "Базис",
       deliveryPeriodLabel: "Період поставки",
-      marketOpen: "Опубліковано для демо",
+      marketOpen: "Опубліковано",
       cardsLabel: "Поточні значення",
       chartsLabel: "Тижнева динаміка",
       chartsTitle: "Зведений тижневий графік",
@@ -216,7 +216,7 @@ const dictionaries: Record<Locale, Dictionary> = {
       descriptionBeforeLink: "UGA Index — це окрема платформа ",
       descriptionLinkText: "Української зернової асоціації",
       descriptionAfterLink:
-        " для щоденної публікації індексів спотових експортних цін на ключові українські зернові та олійні культури. Індекс створений, щоб дати ринку зрозумілий, порівнюваний і методологічно визначений орієнтир цін на базисі FOB Black Sea з періодом поставки T+30.",
+        " для щоденної публікації індексів спотових експортних цін на ключові українські зернові та олійні культури. Індекс створений, щоб дати ринку зрозумілий, порівнюваний і методологічно визначений орієнтир цін на базисі CPT Black Sea Panamax Ports (POC) з періодом поставки T+30.",
       ugaHref: "https://uga.ua/",
       whyLabel: "Чому це важливо",
       whyTitle: "Країновий ціновий орієнтир для експортного ринку",
@@ -259,12 +259,12 @@ const dictionaries: Record<Locale, Dictionary> = {
       coreTitle: "Від EOD-цін респондентів до опублікованого бенчмарку",
       coreNarrative: [
         "UGA Index розраховується на основі щоденних цінових оцінок, які надає репрезентативна група респондентів ринку. Кожне подане значення має відображати справедливий ринковий рівень на кінець торгового дня для реально виконуваної експортної угоди з визначеною культурою, базисом поставки та періодом поставки.",
-        "Для демо-індексу стандартним базисом є FOB Black Sea, а періодом поставки — T+30. Ціни збираються для кожної культури та дати розрахунку, після чого проходять валідацію перед публікацією. Спочатку система визначає медіанне значення у вибірці респондентів. Значення, що відхиляються від медіани більш ніж на ±2%, виключаються з розрахунку як потенційні викиди.",
+        "Стандартним базисом є CPT Чорноморські панамакс морські порти (Одеса, Чорноморськ та Південний), а періодом поставки — T+30. Ціни збираються для кожної культури та дати розрахунку, після чого проходять валідацію перед публікацією. Спочатку система визначає медіанне значення у вибірці респондентів. Значення, що відхиляються від медіани більш ніж на ±2%, виключаються з розрахунку як потенційні викиди.",
         "Після очищення вибірки значення індексу розраховується як середнє арифметичне валідних цін. Корзина може бути опублікована лише тоді, коли після фільтрації залишається щонайменше 5 валідних цін респондентів. Якщо даних недостатньо, система може показувати зовнішні ринкові індикативи окремо, але вони не публікуються автоматично як значення UGA Index.",
         "До публікації значення можуть перевірятися, уточнюватися та мати декілька версій. Після публікації фінальне значення фіксується. Система зберігає зміни, перерахунки та події публікації в журналі аудиту.",
       ],
       facts: [
-        { value: "FOB Black Sea", label: "Стандартний базис поставки для демо" },
+        { value: "CPT UA Black Sea", label: "Стандартний базис поставки" },
         { value: "T+30", label: "Стандартний період поставки" },
         { value: "5+", label: "Мінімум валідних респондентів" },
         { value: "EOD", label: "Оцінка ціни на кінець торгового дня" },
@@ -301,7 +301,7 @@ const dictionaries: Record<Locale, Dictionary> = {
       ],
       pdfTitle: "Офіційний PDF методології",
       pdfDescription:
-        "Завантажте документ методології, використаний як основа для демо-сторінки UGA Index. У production-версії цей файл може бути замінений на підписану та затверджену УЗА версію.",
+        "Завантажте документ методології, використаний як основа для сторінки UGA Index. У production-версії цей файл може бути замінений на підписану та затверджену УЗА версію.",
       pdfDownload: "Завантажити PDF",
       pdfOpen: "Відкрити PDF",
       faqTitle: "FAQ",
@@ -343,7 +343,7 @@ const dictionaries: Record<Locale, Dictionary> = {
       title: "Порівняння культур і тижневі зміни",
       description:
         "Аналітична сторінка готує основу для порівняння індексів, перегляду трендів та історії публікацій.",
-      demoAccess: "Демо-доступ",
+      demoAccess: "Попередній доступ",
       filtersTitle: "Фільтри",
       commodityFilter: "Культура",
       dateRangeFilter: "Період",
@@ -374,7 +374,7 @@ const dictionaries: Record<Locale, Dictionary> = {
       ],
       historicalTitle: "Історичний графік за культурами",
       historicalDescription:
-        "Демо показує останні опубліковані значення для всіх культур.",
+        "Панель показує останні опубліковані значення для всіх культур.",
       dayChangeTitle: "Денні зміни",
       dayChangeDescription:
         "Абсолютна зміна день до дня за останні торгові дні.",
@@ -383,7 +383,7 @@ const dictionaries: Record<Locale, Dictionary> = {
         "Останнє значення кожної культури на одному базисі поставки.",
       tableTitle: "Таблиця опублікованих значень",
       tableDescription:
-        "Демо-історія значень індексу, змін і кількості респондентів.",
+        "Історія значень індексу, змін і кількості респондентів.",
       table: {
         date: "Дата",
         commodity: "Культура",
@@ -395,7 +395,7 @@ const dictionaries: Record<Locale, Dictionary> = {
       },
     },
     footer: {
-      demo: "Демо для Української зернової асоціації.",
+      demo: "Платформа для Української зернової асоціації.",
       partners: "Індикативи: Spike Brokers · Технологія: Cropto/MN7R",
       disclaimer:
         "Інформація надається виключно для інформаційних цілей. УЗА не несе відповідальності за збитки, спричинені використанням даних.",
@@ -426,13 +426,13 @@ const dictionaries: Record<Locale, Dictionary> = {
       partnerLine: "UGA · Spike Brokers · Cropto/MN7R",
       title: "UGA Index",
       description:
-        "Daily Ukrainian spot export price index for core grain and oilseed commodities on a FOB Black Sea basis.",
+        "Daily Ukrainian spot export price index for core grain and oilseed commodities on a CPT Black Sea Panamax Ports (POC) basis.",
       boardTitle: "UGA Index / Export Pricing",
       boardDescription:
-        "Fair Ukrainian export price benchmark in USD/t. FOB Black Sea, T+30, published daily after EOD review.",
+        "Fair Ukrainian export price benchmark in USD/t. CPT Black Sea Panamax Ports (POC), T+30, published daily after EOD review.",
       heroSubtitle:
-        "Daily values for key Ukrainian grains and oilseeds on FOB Black Sea basis.",
-      heroMeta: "FOB Black Sea · T+30 · USD/t · published after EOD review",
+        "Daily values for key Ukrainian grains and oilseeds on CPT Black Sea Panamax Ports (POC) basis.",
+      heroMeta: "CPT Black Sea Panamax Ports (POC) · T+30 · USD/t · published after EOD review",
       heroAttribution:
         "Published by UGA. Market indicatives: Spike Brokers. Technology: Cropto/MN7R.",
       heroAttributionShort: "UGA · Spike Brokers · Cropto/MN7R",
@@ -444,13 +444,13 @@ const dictionaries: Record<Locale, Dictionary> = {
       selectorTitle: "Commodities",
       reportTitle: "Download report",
       reportDescription:
-        "Demo export of the daily index pack for presentations and internal review.",
-      reportAction: "PDF / Excel demo",
+        "Export of the daily index pack for presentations and internal review.",
+      reportAction: "PDF / Excel",
       statusLabel: "Update status",
       updatedLabel: "Updated",
       basisLabel: "Basis",
       deliveryPeriodLabel: "Delivery period",
-      marketOpen: "Published for demo",
+      marketOpen: "Published",
       cardsLabel: "Current index values",
       chartsLabel: "Weekly movement",
       chartsTitle: "Combined weekly chart",
@@ -486,7 +486,7 @@ const dictionaries: Record<Locale, Dictionary> = {
       descriptionBeforeLink: "UGA Index is a dedicated platform by the ",
       descriptionLinkText: "Ukrainian Grain Association",
       descriptionAfterLink:
-        " for publishing daily spot export price benchmarks for key Ukrainian grains and oilseeds. The index is designed to give the market a clear, comparable and methodology-based reference for FOB Black Sea, T+30 price levels.",
+        " for publishing daily spot export price benchmarks for key Ukrainian grains and oilseeds. The index is designed to give the market a clear, comparable and methodology-based reference for CPT Black Sea Panamax Ports (POC), T+30 price levels.",
       ugaHref: "https://uga.ua/en/",
       whyLabel: "Why it matters",
       whyTitle: "A country-level price reference for an export-driven market",
@@ -529,12 +529,12 @@ const dictionaries: Record<Locale, Dictionary> = {
       coreTitle: "From respondent EOD prices to a published benchmark",
       coreNarrative: [
         "UGA Index is calculated from daily price assessments submitted by a representative group of market respondents. Each submitted value should reflect a fair end-of-day market level for an executable export transaction, using the defined commodity, delivery basis and delivery period.",
-        "For the demo index, the standard basis is FOB Black Sea and the delivery period is T+30. Prices are collected for each commodity and calculation date, then validated before publication. The calculation first identifies the median value in the respondent sample. Prices that deviate by more than ±2% from the median are excluded from the calculation as potential outliers.",
+        "The standard basis is CPT Black Sea Panamax Ports (Odesa, Chornomorsk and Pivdennyi), and the delivery period is T+30. Prices are collected for each commodity and calculation date, then validated before publication. The calculation first identifies the median value in the respondent sample. Prices that deviate by more than ±2% from the median are excluded from the calculation as potential outliers.",
         "The index value is then calculated as the arithmetic average of the cleaned respondent sample. A basket is publishable only when at least 5 valid respondent prices remain after filtering. If the data are insufficient, the system may display external market indicatives separately, but they are not silently published as UGA Index values.",
         "Before publication, values can be reviewed, corrected and versioned. After publication, the final value is locked. The system records changes, recalculations and publication events in an audit log.",
       ],
       facts: [
-        { value: "FOB Black Sea", label: "Standard demo delivery basis" },
+        { value: "CPT UA Black Sea", label: "Standard delivery basis" },
         { value: "T+30", label: "Standard delivery period" },
         { value: "5+", label: "Minimum valid respondents" },
         { value: "EOD", label: "End-of-day price assessment" },
@@ -571,7 +571,7 @@ const dictionaries: Record<Locale, Dictionary> = {
       ],
       pdfTitle: "Official methodology PDF",
       pdfDescription:
-        "Download the methodology document used as the basis for the UGA Index demo page. The production site can replace this file with the signed and stamped version approved by UGA.",
+        "Download the methodology document used as the basis for the UGA Index page. The production site can replace this file with the signed and stamped version approved by UGA.",
       pdfDownload: "Download PDF",
       pdfOpen: "Open PDF",
       faqTitle: "FAQ",
@@ -613,7 +613,7 @@ const dictionaries: Record<Locale, Dictionary> = {
       title: "Commodity comparison and weekly change",
       description:
         "The analytics page prepares the surface for comparing index values, reviewing trends, and reading publication history.",
-      demoAccess: "Demo access",
+      demoAccess: "Access preview",
       filtersTitle: "Filters",
       commodityFilter: "Commodity",
       dateRangeFilter: "Date range",
@@ -644,7 +644,7 @@ const dictionaries: Record<Locale, Dictionary> = {
       ],
       historicalTitle: "Historical line chart by commodity",
       historicalDescription:
-        "The demo shows recently published values for all commodities.",
+        "The panel shows recently published values for all commodities.",
       dayChangeTitle: "Day-over-day changes",
       dayChangeDescription:
         "Absolute movement from the previous trading day.",
@@ -653,7 +653,7 @@ const dictionaries: Record<Locale, Dictionary> = {
         "Latest value for each commodity on the same delivery basis.",
       tableTitle: "Published values table",
       tableDescription:
-        "Demo history of index values, changes, and respondent counts.",
+        "History of index values, changes, and respondent counts.",
       table: {
         date: "Date",
         commodity: "Commodity",
@@ -665,7 +665,7 @@ const dictionaries: Record<Locale, Dictionary> = {
       },
     },
     footer: {
-      demo: "Demo for the Ukrainian Grain Association.",
+      demo: "Platform for the Ukrainian Grain Association.",
       partners: "Indicatives: Spike Brokers · Technology: Cropto/MN7R",
       disclaimer:
         "Information is provided for informational purposes only. UGA is not liable for losses caused by use of the data.",

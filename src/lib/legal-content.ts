@@ -301,7 +301,7 @@ const legalContent: Record<Locale, Record<LegalPageSlug, LegalPageContent>> = {
         {
           title: "6. Analytics and API",
           paragraphs: [
-            "Analytics and API functionality may be provided as demo, preview, member-only or paid access. Availability, scope, pricing and technical conditions may change over time.",
+            "Analytics and API functionality may be provided as preview, member-only or paid access. Availability, scope, pricing and technical conditions may change over time.",
           ],
         },
         {
@@ -393,7 +393,7 @@ const legalContent: Record<Locale, Record<LegalPageSlug, LegalPageContent>> = {
         {
           title: "7. Scenario analytics",
           paragraphs: [
-            "Any AI-assisted or model-based scenario outputs are analytical demonstrations only. They are not guaranteed forecasts and should not be relied upon as predictions of future prices.",
+            "Any AI-assisted or model-based scenario outputs are analytical previews only. They are not guaranteed forecasts and should not be relied upon as predictions of future prices.",
           ],
         },
         {
@@ -555,7 +555,7 @@ const legalContent: Record<Locale, Record<LegalPageSlug, LegalPageContent>> = {
         {
           title: "6. Аналітика та API",
           paragraphs: [
-            "Функціонал аналітики та API може надаватися у форматі демо, попереднього доступу, доступу для членів або платної підписки. Доступність, обсяг, ціни та технічні умови можуть змінюватися з часом.",
+            "Функціонал аналітики та API може надаватися у форматі попереднього доступу, доступу для членів або платної підписки. Доступність, обсяг, ціни та технічні умови можуть змінюватися з часом.",
           ],
         },
         {
@@ -647,7 +647,7 @@ const legalContent: Record<Locale, Record<LegalPageSlug, LegalPageContent>> = {
         {
           title: "7. Сценарна аналітика",
           paragraphs: [
-            "Будь-які AI-assisted або модельні сценарні результати є лише аналітичною демонстрацією. Вони не є гарантованими прогнозами та не повинні використовуватися як передбачення майбутніх цін.",
+            "Будь-які AI-assisted або модельні сценарні результати є лише аналітичним попереднім переглядом. Вони не є гарантованими прогнозами та не повинні використовуватися як передбачення майбутніх цін.",
           ],
         },
         {

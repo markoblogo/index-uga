@@ -41,7 +41,7 @@ const labels = {
     date: "Date",
     draftSaved: "Draft saved.",
     intro:
-      "Submit today’s FOB Black Sea price indicatives for your company. Individual submissions are used for index calculation and are not published publicly.",
+      "Submit today’s CPT UA Black Sea price indicatives for your company. Individual submissions are used for index calculation and are not published publicly.",
     price: "Price",
     saveDraft: "Save as draft",
     source: "Source",
@@ -58,7 +58,7 @@ const labels = {
     date: "Дата",
     draftSaved: "Чернетку збережено.",
     intro:
-      "Подайте сьогоднішні цінові індикативи FOB Black Sea від вашої компанії. Індивідуальні значення використовуються для розрахунку індексу і не публікуються відкрито.",
+      "Подайте сьогоднішні цінові індикативи CPT UA Black Sea від вашої компанії. Індивідуальні значення використовуються для розрахунку індексу і не публікуються відкрито.",
     price: "Ціна",
     saveDraft: "Зберегти чернетку",
     source: "Джерело",
@@ -256,7 +256,7 @@ async function saveDatabaseRespondentSurvey({
   });
 
   if (!basis) {
-    throw new Error("FOB Black Sea delivery basis is not seeded.");
+    throw new Error("CPT UA Black Sea delivery basis is not seeded.");
   }
 
   for (const entry of entries) {

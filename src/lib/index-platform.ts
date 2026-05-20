@@ -33,6 +33,7 @@ export type IndexConfig = {
   logoPath?: string;
   logoHeaderPath?: string;
   defaultDeliveryBasis: string;
+  heroDeliveryBasis?: string;
   defaultDeliveryPeriod: string;
   currency: "USD";
   unit: "t";
@@ -248,7 +249,8 @@ export const INDEX_CONFIGS: Record<IndexTenantId, IndexConfig> = {
     brandUrl: "https://uga.ua/",
     logoPath: "/brand/uga-logo.png",
     logoHeaderPath: "/brand/uga-logo-header.png",
-    defaultDeliveryBasis: "FOB Black Sea",
+    defaultDeliveryBasis: "CPT UA Black Sea",
+    heroDeliveryBasis: "CPT Black Sea Panamax Ports (POC)",
     defaultDeliveryPeriod: "T+30",
     currency: "USD",
     unit: "t",
@@ -259,8 +261,8 @@ export const INDEX_CONFIGS: Record<IndexTenantId, IndexConfig> = {
     theme: { dataAttribute: "uga" },
     home: {
       subtitle: {
-        uk: "Щоденні значення для ключових зернових та олійних культур України на базисі FOB Black Sea.",
-        en: "Daily values for core Ukrainian grain and oilseed commodities on FOB Black Sea basis.",
+        uk: "Щоденні значення для ключових зернових та олійних культур України на базисі CPT Black Sea Panamax Ports (POC).",
+        en: "Daily values for core Ukrainian grain and oilseed commodities on CPT Black Sea Panamax Ports (POC) basis.",
       },
       trustStrip: {
         uk: "EOD-дані респондентів · медіанна валідація · +/-2% фільтр викидів · мінімум 5 респондентів · фіксація після публікації",
@@ -285,7 +287,7 @@ export const INDEX_CONFIGS: Record<IndexTenantId, IndexConfig> = {
         uk: "Офіційні значення: USD/т. UAH та EUR - перерахунок для відображення.",
         en: "Official values: USD/t. UAH and EUR are display conversions.",
       },
-      footerDemo: { uk: "Демо для", en: "Demo for the" },
+      footerDemo: { uk: "Платформа:", en: "Platform for the" },
       partnersLine: {
         uk: "Індикативи: Spike Brokers · Технологія: Cropto/MN7R",
         en: "Indicatives: Spike Brokers · Technology: Cropto/MN7R",
@@ -307,10 +309,10 @@ export const INDEX_CONFIGS: Record<IndexTenantId, IndexConfig> = {
     deliveryBases: [
       {
         code: "FOB_BLACK_SEA",
-        name: "FOB Black Sea",
-        region: "Black Sea",
+        name: "CPT UA Black Sea",
+        region: "UA Black Sea",
         basketCode: "FOB_BLACK_SEA_DEMO",
-        basketName: "FOB Black Sea Demo Basket",
+        basketName: "CPT UA Black Sea Basket",
       },
     ],
     respondents: sharedRespondents,
@@ -367,7 +369,7 @@ export const INDEX_CONFIGS: Record<IndexTenantId, IndexConfig> = {
         uk: "Офіційні значення публікуються у USD/т. Для сої ГМО та соняшнику ціна включає ПДВ.",
         en: "Official values are published in USD/t. GMO soybean and sunflower include VAT.",
       },
-      footerDemo: { uk: "Платформа для", en: "Platform for" },
+      footerDemo: { uk: "Платформа:", en: "Platform for" },
       partnersLine: {
         uk: "Дані: партнери Spike Brokers · Технологія: Cropto/MN7R",
         en: "Data: Spike Brokers partners · Technology: Cropto/MN7R",

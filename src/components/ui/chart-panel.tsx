@@ -1,5 +1,6 @@
 import type { Commodity } from "@/lib/mock-data";
 import type { Locale } from "@/lib/i18n";
+import { SITE_CONFIG } from "@/lib/constants";
 
 type ChartPanelProps = {
   commodity: Commodity;
@@ -26,7 +27,9 @@ export function ChartPanel({ commodity, locale, values }: ChartPanelProps) {
           <h3 className="text-lg font-semibold text-black">
             {commodity.name[locale]}
           </h3>
-          <p className="mt-1 text-sm text-black/55">FOB Black Sea · USD/t</p>
+          <p className="mt-1 text-sm text-black/55">
+            {SITE_CONFIG.defaultDeliveryBasis} · USD/t
+          </p>
         </div>
         <p className="text-right text-sm font-semibold text-uga-green">
           {values[values.length - 1]}
