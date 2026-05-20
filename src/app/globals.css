@@ -154,6 +154,30 @@ html[data-theme="dark"] body[data-index="uga"] .uga-internal-shell .admin-warnin
   color: #06150d !important;
 }
 
+html[data-theme="dark"] [data-embed-site] {
+  color: var(--color-ink);
+}
+
+html[data-theme="dark"] [data-embed-site] .text-black,
+html[data-theme="dark"] [data-embed-site] .text-uga-dark {
+  color: var(--color-ink) !important;
+}
+
+html[data-theme="dark"] [data-embed-site] .text-black\/45,
+html[data-theme="dark"] [data-embed-site] .text-black\/50,
+html[data-theme="dark"] [data-embed-site] .text-black\/55,
+html[data-theme="dark"] [data-embed-site] .text-black\/60,
+html[data-theme="dark"] [data-embed-site] .text-black\/65,
+html[data-theme="dark"] [data-embed-site] .text-black\/70 {
+  color: rgba(var(--color-ink-rgb) / 0.68) !important;
+}
+
+html[data-theme="dark"] [data-embed-site] .border-black,
+html[data-theme="dark"] [data-embed-site] .border-black\/10,
+html[data-theme="dark"] [data-embed-site] .border-black\/20 {
+  border-color: var(--color-strong-border) !important;
+}
+
 body[data-index="spike"] {
   --color-surface-rgb: 9 9 9;
   --color-panel-rgb: 14 14 14;

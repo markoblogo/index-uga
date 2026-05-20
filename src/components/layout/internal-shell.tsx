@@ -16,6 +16,7 @@ const navByRole = {
     { href: "/admin/daily-inputs", label: "Daily input" },
     { href: "/admin/respondents", label: "Respondents" },
     { href: "/admin/calculate", label: "Calculate & publish" },
+    { href: "/admin/embed", label: "Embed on UGA site" },
   ],
   respondent: [
     { href: "/respondent", label: "Survey form" },

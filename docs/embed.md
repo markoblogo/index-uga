@@ -30,6 +30,33 @@ Supported query parameters:
 - `theme=light`
 - `layout=cards|compact`
 
+## Embedded Site Frame
+
+Use this version when UGA creates a dedicated page section and wants to place
+the full UGA Index experience inside that area. The frame has no footer. Its
+header is hidden by default and appears when the visitor moves the cursor near
+the top edge of the embedded area. The header contains localized navigation,
+theme switch, fullscreen action, and a link to open the standalone index site.
+
+```html
+<iframe
+  src="${NEXT_PUBLIC_SITE_URL}/embed/site?locale=uk&theme=light&view=index"
+  title="UGA Index"
+  loading="lazy"
+  allowfullscreen
+  style="width: 100%; height: 820px; border: 0; display: block;"
+></iframe>
+```
+
+Supported query parameters:
+
+- `locale=uk|en`
+- `theme=light|dark`
+- `view=index|about|methodology|analytics`
+
+The UGA website should pass the active site language into `locale` so the
+embedded experience matches the surrounding page.
+
 ## Iframe Chart
 
 ```html
@@ -50,7 +77,7 @@ Supported commodities:
 
 ## JavaScript Loader
 
-The loader injects the cards iframe into the element referenced by `data-target`.
+The loader injects an iframe into the element referenced by `data-target`.
 
 ```html
 <div id="uga-index-widget"></div>
@@ -68,7 +95,7 @@ Loader data attributes:
 - `data-target`: CSS selector for the container element.
 - `data-locale`: `uk` or `en`.
 - `data-theme`: currently `light`.
-- `data-layout`: `cards` or `compact`.
+- `data-layout`: `cards`, `compact`, or `site`.
 
 ## WordPress Notes
 

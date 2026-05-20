@@ -28,11 +28,12 @@ export function GET() {
       var locale = normalize(script.getAttribute("data-locale"), "en");
       var theme = normalize(script.getAttribute("data-theme"), "light");
       var layout = normalize(script.getAttribute("data-layout"), "cards");
-      var height = layout === "compact" ? "320" : "420";
+      var height = layout === "site" ? "820" : layout === "compact" ? "320" : "420";
       var scriptUrl = new URL(script.src, window.location.href);
-      var src = scriptUrl.origin + "/embed/cards?locale=" + encodeURIComponent(locale) +
+      var endpoint = layout === "site" ? "/embed/site" : "/embed/cards";
+      var src = scriptUrl.origin + endpoint + "?locale=" + encodeURIComponent(locale) +
         "&theme=" + encodeURIComponent(theme) +
-        "&layout=" + encodeURIComponent(layout);
+        (layout === "site" ? "&view=index" : "&layout=" + encodeURIComponent(layout));
       var iframe = document.createElement("iframe");
 
       iframe.src = src;
@@ -44,6 +45,7 @@ export function GET() {
       iframe.style.border = "0";
       iframe.style.display = "block";
       iframe.setAttribute("scrolling", "no");
+      iframe.setAttribute("allowfullscreen", "");
 
       target.innerHTML = "";
       target.appendChild(iframe);
