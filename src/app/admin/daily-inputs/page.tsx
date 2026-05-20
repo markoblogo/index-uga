@@ -82,7 +82,7 @@ export default async function DailyInputsPage({
               <span className="rounded-full bg-uga-mist px-3 py-1 text-uga-green">
                 Source: {data.source}
               </span>
-              <span className="rounded-full bg-black px-3 py-1 text-white">
+              <span className="admin-dark-pill rounded-full bg-black px-3 py-1 text-white">
                 No publish action
               </span>
             </div>

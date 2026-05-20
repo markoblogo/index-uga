@@ -140,6 +140,12 @@ html[data-theme="dark"] body[data-index="uga"] .uga-internal-shell .admin-warnin
   color: var(--color-negative) !important;
 }
 
+html[data-theme="dark"] body[data-index="uga"] .uga-internal-shell .admin-dark-pill {
+  background: var(--color-dark) !important;
+  border: 1px solid rgba(var(--color-ink-rgb) / 0.16);
+  color: var(--color-ink) !important;
+}
+
 body[data-index="spike"] {
   --color-surface-rgb: 9 9 9;
   --color-panel-rgb: 14 14 14;
