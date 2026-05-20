@@ -581,7 +581,7 @@ function getAnalyticsCopy(locale: Locale) {
       outlookDescription:
         "Місячний сценарний діапазон для довшого аналітичного горизонту.",
       outlookTitle: "Аналітичний прогноз на 12 місяців",
-      plannedLabel: "planned",
+      plannedLabel: "за підпискою",
       previewLabel: "Попередній доступ",
       publishedLabel: "published",
       quarterTitle: "Сценарій на найближчий квартал",
@@ -701,7 +701,7 @@ function getAnalyticsCopy(locale: Locale) {
     outlookDescription:
       "Monthly scenario range for a longer analytical horizon.",
     outlookTitle: "12-month analytical outlook",
-    plannedLabel: "planned",
+    plannedLabel: "by subscription",
     previewLabel: "Preview access",
     publishedLabel: "published",
     quarterTitle: "Next quarter scenario",
