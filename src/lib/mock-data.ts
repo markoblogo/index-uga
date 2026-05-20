@@ -1,5 +1,6 @@
 import type { Locale } from "@/lib/i18n";
 import { getActiveIndexConfig } from "@/lib/index-platform";
+import { getActiveRespondentCount } from "@/lib/respondent-directory";
 
 const activeIndex = getActiveIndexConfig();
 
@@ -82,7 +83,7 @@ export const latestQuotes: LatestQuote[] = commodities.map((commodity) => ({
   price: commodity.latest,
   absoluteChange: commodity.absoluteChange,
   percentChange: commodity.percentChange,
-  respondents: commodity.id === "feed-wheat" ? 6 : 8,
+  respondents: getActiveRespondentCount(),
 }));
 
 export const partners: Partner[] = [

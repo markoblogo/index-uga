@@ -146,6 +146,10 @@ html[data-theme="dark"] body[data-index="uga"] .uga-internal-shell .admin-dark-p
   color: var(--color-ink) !important;
 }
 
+html[data-theme="dark"] body[data-index="uga"] .uga-internal-shell .admin-contrast-pill {
+  color: #06150d !important;
+}
+
 body[data-index="spike"] {
   --color-surface-rgb: 9 9 9;
   --color-panel-rgb: 14 14 14;
@@ -466,6 +470,24 @@ a {
 
   .ui-control {
     border-radius: var(--radius-control);
+  }
+
+  .admin-field {
+    width: 100%;
+    border: 1px solid var(--color-strong-border);
+    border-radius: 0;
+    background: var(--color-surface);
+    padding: 0.62rem 0.75rem;
+    color: var(--color-ink);
+    font-size: 0.875rem;
+    font-weight: 700;
+    letter-spacing: 0;
+    outline: none;
+  }
+
+  .admin-field:focus {
+    border-color: var(--color-green);
+    box-shadow: 0 0 0 2px rgb(var(--color-green-rgb) / 0.18);
   }
 }
 

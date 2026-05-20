@@ -6,6 +6,7 @@ import type { FxRates } from "@/lib/fx-rates";
 import type { Locale } from "@/lib/i18n";
 import { getActiveIndexConfig } from "@/lib/index-platform";
 import type { Commodity } from "@/lib/mock-data";
+import { getActiveRespondentCount } from "@/lib/respondent-directory";
 
 type HomeHeroProps = {
   commodities: Commodity[];
@@ -31,6 +32,12 @@ export function HomeHero({
 }: HomeHeroProps) {
   const activeIndex = getActiveIndexConfig();
   const copy = getHeroCopy(locale);
+  const activeRespondentCount = getActiveRespondentCount();
+  const facts = copy.facts.map((fact) =>
+    fact.kind === "respondents"
+      ? { ...fact, value: String(activeRespondentCount) }
+      : fact,
+  );
 
   if (activeIndex.id === "spike-ua") {
     return (
@@ -78,7 +85,7 @@ export function HomeHero({
               </p>
 
               <div className="mt-5 grid grid-cols-3 border border-black">
-                {copy.facts.map((fact) => (
+                {facts.map((fact) => (
                   <div
                     className="border-r border-black p-3 last:border-r-0"
                     key={fact.label}
@@ -123,6 +130,7 @@ export function HomeHero({
             officialLabel={copy.officialLabel}
             officialNotice={copy.officialNotice}
             respondentLabel={copy.respondents}
+            respondentCount={activeRespondentCount}
             updatedAt={updatedAt}
             updatedLabel={labels.updated}
           />
@@ -407,6 +415,7 @@ function HeroIndexBoard({
   officialNotice,
   boardKicker,
   respondentLabel,
+  respondentCount,
   updatedAt,
   updatedLabel,
 }: {
@@ -420,6 +429,7 @@ function HeroIndexBoard({
   officialNotice: string;
   boardKicker: string;
   respondentLabel: string;
+  respondentCount: number;
   updatedAt: string;
   updatedLabel: string;
 }) {
@@ -456,6 +466,7 @@ function HeroIndexBoard({
             locale={locale}
             officialLabel={officialLabel}
             respondentLabel={respondentLabel}
+            respondentCount={respondentCount}
           />
         ))}
       </div>
@@ -469,12 +480,14 @@ function HeroIndexCard({
   locale,
   officialLabel,
   respondentLabel,
+  respondentCount,
 }: {
   commodity: Commodity;
   fxRates: FxRates;
   locale: Locale;
   officialLabel: string;
   respondentLabel: string;
+  respondentCount: number;
 }) {
   const isPositive = commodity.absoluteChange >= 0;
   const trend = isPositive ? "up" : "down";
@@ -530,7 +543,7 @@ function HeroIndexCard({
         </div>
         <p className="mt-2 truncate text-[0.65rem] font-black tracking-[0.12em] text-black/45">
           {SITE_CONFIG.defaultDeliveryBasis} · {SITE_CONFIG.defaultDeliveryPeriod} ·
-          {" 8 "}
+          {` ${respondentCount} `}
           {respondentLabel}
         </p>
       </div>
@@ -545,7 +558,7 @@ function getHeroCopy(locale: Locale) {
     return {
       editorialLine: activeIndex.home.editorialLine.uk,
       boardKicker: activeIndex.home.boardKicker.uk,
-      facts: activeIndex.home.facts.uk,
+      facts: withRespondentFactKind(activeIndex.home.facts.uk),
       kicker: "Spot export price index",
       methodologyPrefix: "Методологія",
       methodologyShort: activeIndex.home.trustStrip.uk,
@@ -560,7 +573,7 @@ function getHeroCopy(locale: Locale) {
   return {
     editorialLine: activeIndex.home.editorialLine.en,
     boardKicker: activeIndex.home.boardKicker.en,
-    facts: activeIndex.home.facts.en,
+    facts: withRespondentFactKind(activeIndex.home.facts.en),
     kicker: "Spot export price index",
     methodologyPrefix: "Methodology",
     methodologyShort: activeIndex.home.trustStrip.en,
@@ -578,4 +591,17 @@ function formatFxSource(source: FxRates["source"], locale: Locale) {
   }
 
   return source === "demo" ? "FX fallback" : source;
+}
+
+function withRespondentFactKind(
+  facts: Array<{ label: string; value: string }>,
+) {
+  return facts.map((fact) => ({
+    ...fact,
+    kind:
+      fact.label.toLowerCase().includes("respondent") ||
+      fact.label.toLowerCase().includes("респондент")
+        ? "respondents"
+        : "default",
+  }));
 }

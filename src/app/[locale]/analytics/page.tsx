@@ -14,6 +14,7 @@ import {
   type Commodity,
   type CommodityId,
 } from "@/lib/mock-data";
+import { getActiveRespondentCount } from "@/lib/respondent-directory";
 
 type AnalyticsPoint = {
   date: string;
@@ -357,6 +358,7 @@ function PublishedValuesTable({
 }
 
 function buildAnalyticsHistory(): AnalyticsPoint[] {
+  const activeRespondentCount = getActiveRespondentCount();
   const dates = Array.from({ length: 360 }, (_, index) => {
     const date = new Date("2026-05-08T00:00:00.000Z");
     date.setUTCDate(date.getUTCDate() - (359 - index));
@@ -386,8 +388,7 @@ function buildAnalyticsHistory(): AnalyticsPoint[] {
         dayChange,
         percentChange:
           previousValue === 0 ? 0 : roundOne((dayChange / previousValue) * 100),
-        respondents:
-          commodity.id === "feed-wheat" ? 6 + (index % 3 === 0 ? 1 : 0) : 8,
+        respondents: activeRespondentCount,
         value,
       };
     });
@@ -459,7 +460,7 @@ function buildMarketSnapshot(history: AnalyticsPoint[], locale: Locale) {
     {
       label: copy.respondentCoverage,
       meta: copy.currentBasket,
-      value: "6-8",
+      value: String(getActiveRespondentCount()),
     },
   ];
 }

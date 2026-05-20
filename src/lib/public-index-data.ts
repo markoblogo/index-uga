@@ -10,6 +10,7 @@ import {
   type CommodityId,
   type LatestQuote,
 } from "@/lib/mock-data";
+import { getActiveRespondentCount } from "@/lib/respondent-directory";
 
 export type PublicIndexSnapshot = {
   commodities: Commodity[];
@@ -47,6 +48,7 @@ export async function getPublicIndexSnapshot(): Promise<PublicIndexSnapshot> {
 
 function getMockPublicIndexSnapshot(): PublicIndexSnapshot {
   const latestPublished = getLatestDemoPublishedIndices(MOCK_BASIS_ID);
+  const activeRespondentCount = getActiveRespondentCount();
   const publicCommodities = commodities.map((commodity) => {
     const published = latestPublished.get(commodity.id);
 
@@ -69,7 +71,7 @@ function getMockPublicIndexSnapshot(): PublicIndexSnapshot {
       const published = latestPublished.get(quote.commodityId);
 
       if (!published) {
-        return quote;
+        return { ...quote, respondents: activeRespondentCount };
       }
 
       return {
@@ -79,6 +81,7 @@ function getMockPublicIndexSnapshot(): PublicIndexSnapshot {
         price: published.value,
         absoluteChange: published.changeAbs ?? 0,
         percentChange: published.changePct ?? 0,
+        respondents: activeRespondentCount,
       };
     }),
     updatedAt:
@@ -89,6 +92,7 @@ function getMockPublicIndexSnapshot(): PublicIndexSnapshot {
 }
 
 async function getDatabasePublicIndexSnapshot(): Promise<PublicIndexSnapshot> {
+  const activeRespondentCount = getActiveRespondentCount();
   const [basis, basket] = await Promise.all([
     db.deliveryBasis.findUnique({ where: { code: BASIS_CODE } }),
     db.basket.findUnique({ where: { code: BASKET_CODE } }),
@@ -150,7 +154,10 @@ async function getDatabasePublicIndexSnapshot(): Promise<PublicIndexSnapshot> {
     const publishedIndex = publishedByCommodityId.get(commodity.id);
 
     if (!publishedIndex) {
-      return latestQuotes.find((quote) => quote.commodityId === mockCommodity.id)!;
+      const quote = latestQuotes.find(
+        (item) => item.commodityId === mockCommodity.id,
+      )!;
+      return { ...quote, respondents: activeRespondentCount };
     }
 
     return {
@@ -161,7 +168,7 @@ async function getDatabasePublicIndexSnapshot(): Promise<PublicIndexSnapshot> {
       price: publishedIndex.valueUsdPerMt.toNumber(),
       absoluteChange: publishedIndex.changeAbsUsdPerMt?.toNumber() ?? 0,
       percentChange: publishedIndex.changePct?.toNumber() ?? 0,
-      respondents: 8,
+      respondents: activeRespondentCount,
     };
   });
 

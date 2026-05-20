@@ -3,11 +3,11 @@ import { hasDatabaseUrl } from "@/lib/admin-daily-inputs";
 import { SITE_CONFIG } from "@/lib/constants";
 import {
   commodities,
-  latestQuotes,
   weeklySeries,
   type CommodityId,
 } from "@/lib/mock-data";
 import { getPublicIndexSnapshot } from "@/lib/public-index-data";
+import { getActiveRespondentCount } from "@/lib/respondent-directory";
 
 export type PublicLatestItem = {
   commodityId: CommodityId;
@@ -97,6 +97,8 @@ async function getMockLatestData(): Promise<PublicLatestItem[]> {
 }
 
 function getMockHistoryData(): PublicHistoryItem[] {
+  const activeRespondentCount = getActiveRespondentCount();
+
   return commodities.flatMap((commodity) =>
     weeklySeries[commodity.id].map((value, index, values) => {
       const previousValue = values[index - 1] ?? value;
@@ -113,8 +115,7 @@ function getMockHistoryData(): PublicHistoryItem[] {
         changeAbs,
         changePct:
           previousValue === 0 ? 0 : roundTwo((changeAbs / previousValue) * 100),
-        respondents: latestQuotes.find((quote) => quote.commodityId === commodity.id)
-          ?.respondents ?? 8,
+        respondents: activeRespondentCount,
         status: "published",
       };
     }),
@@ -162,7 +163,7 @@ async function getDatabaseLatestData(): Promise<PublicLatestItem[]> {
         valueUsdPerMt: published.valueUsdPerMt.toNumber(),
         changeAbs: published.changeAbsUsdPerMt?.toNumber() ?? 0,
         changePct: published.changePct?.toNumber() ?? 0,
-        respondents: 8,
+        respondents: getActiveRespondentCount(),
       };
     }),
   );
@@ -202,7 +203,7 @@ async function getDatabaseHistoryData(): Promise<PublicHistoryItem[]> {
     valueUsdPerMt: row.valueUsdPerMt.toNumber(),
     changeAbs: row.changeAbsUsdPerMt?.toNumber() ?? 0,
     changePct: row.changePct?.toNumber() ?? 0,
-    respondents: 8,
+    respondents: getActiveRespondentCount(),
     status: "published",
   }));
 }
