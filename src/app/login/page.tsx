@@ -3,7 +3,11 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { authenticateDemoUser } from "@/lib/demo-allowlist";
-import { getCurrentDemoUser, getRoleHome, setDemoSession } from "@/lib/demo-auth";
+import {
+  getCurrentDemoUser,
+  getSafeRoleRedirect,
+  setDemoSession,
+} from "@/lib/demo-auth";
 import { SITE_CONFIG } from "@/lib/constants";
 import { isLocale, LOCALE_COOKIE, type Locale } from "@/lib/i18n";
 
@@ -24,9 +28,10 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
   const locale = resolveLoginLocale(params.locale, cookieStore.get(LOCALE_COOKIE)?.value);
   const isSpike = SITE_CONFIG.tenantId === "spike-ua";
   const copy = getLoginCopy(locale, isSpike);
+  const nextPath = params.next ?? null;
 
   if (currentUser) {
-    redirect(getRoleHome(currentUser.role));
+    redirect(getSafeRoleRedirect(currentUser.role, nextPath));
   }
 
   async function login(formData: FormData) {
@@ -35,15 +40,17 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
     const loginValue = String(formData.get("email") ?? "");
     const password = String(formData.get("password") ?? "");
     const localeValue = String(formData.get("locale") ?? "en");
+    const nextValue = String(formData.get("next") ?? "");
     const resolvedLocale = resolveLoginLocale(localeValue);
     const user = authenticateDemoUser({ login: loginValue, password });
 
     if (!user) {
-      redirect(`/login?locale=${resolvedLocale}&error=invalid`);
+      const nextQuery = nextValue ? `&next=${encodeURIComponent(nextValue)}` : "";
+      redirect(`/login?locale=${resolvedLocale}&error=invalid${nextQuery}`);
     }
 
     await setDemoSession(user);
-    redirect(getRoleHome(user.role));
+    redirect(getSafeRoleRedirect(user.role, nextValue));
   }
 
   return (
@@ -93,6 +100,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
 
         <form action={login} className={isSpike ? "grid gap-4 p-6" : "grid gap-4 p-5"}>
           <input name="locale" type="hidden" value={locale} />
+          <input name="next" type="hidden" value={nextPath ?? ""} />
           <label
             className={
               isSpike

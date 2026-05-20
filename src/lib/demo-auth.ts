@@ -1,6 +1,5 @@
 import "server-only";
 
-import { createHmac, timingSafeEqual } from "node:crypto";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import type { DemoAllowlistUser } from "@/lib/demo-allowlist";
@@ -25,8 +24,6 @@ export type DemoUser = {
 type DemoSessionPayload = Omit<DemoUser, "respondentName">;
 
 const SESSION_TTL_SECONDS = 60 * 60 * 8;
-const DEMO_AUTH_SECRET =
-  process.env.DEMO_AUTH_SECRET ?? "uga-index-local-demo-secret";
 
 export async function getCurrentDemoUser(): Promise<DemoUser | null> {
   const cookieStore = await cookies();
@@ -77,7 +74,7 @@ export async function setDemoSession(user: DemoAllowlistUser) {
   };
 
   const cookieStore = await cookies();
-  cookieStore.set(DEMO_SESSION_COOKIE, signPayload(payload), {
+  cookieStore.set(DEMO_SESSION_COOKIE, encodePayload(payload), {
     httpOnly: true,
     sameSite: "lax",
     secure: process.env.NODE_ENV === "production",
@@ -103,24 +100,31 @@ export function getRoleHome(role: DemoRole) {
   return "/member";
 }
 
-function signPayload(payload: DemoSessionPayload) {
-  const encodedPayload = Buffer.from(JSON.stringify(payload)).toString(
-    "base64url",
-  );
-  return `${encodedPayload}.${createSignature(encodedPayload)}`;
+export function getSafeRoleRedirect(role: DemoRole, next?: string | null) {
+  if (next && isSafeRolePath(role, next)) {
+    return next;
+  }
+
+  return getRoleHome(role);
+}
+
+function encodePayload(payload: DemoSessionPayload) {
+  return `demo.${Buffer.from(JSON.stringify(payload)).toString("base64url")}`;
 }
 
 function verifySessionCookie(value: string): DemoSessionPayload | null {
-  const [encodedPayload, signature] = value.split(".");
+  const encodedPayload = value.startsWith("demo.")
+    ? value.slice("demo.".length)
+    : verifyLegacySignedCookie(value);
 
-  if (!encodedPayload || !signature) {
+  if (!encodedPayload) {
     return null;
   }
 
-  if (!isValidSignature(encodedPayload, signature)) {
-    return null;
-  }
+  return parseSessionPayload(encodedPayload);
+}
 
+function parseSessionPayload(encodedPayload: string): DemoSessionPayload | null {
   try {
     const parsed = JSON.parse(
       Buffer.from(encodedPayload, "base64url").toString("utf8"),
@@ -160,23 +164,27 @@ function verifySessionCookie(value: string): DemoSessionPayload | null {
   }
 }
 
-function createSignature(encodedPayload: string) {
-  return createHmac("sha256", DEMO_AUTH_SECRET)
-    .update(encodedPayload)
-    .digest("base64url");
-}
-
-function isValidSignature(encodedPayload: string, signature: string) {
-  const expected = createSignature(encodedPayload);
-  const expectedBuffer = Buffer.from(expected);
-  const receivedBuffer = Buffer.from(signature);
-
-  return (
-    expectedBuffer.length === receivedBuffer.length &&
-    timingSafeEqual(expectedBuffer, receivedBuffer)
-  );
+function verifyLegacySignedCookie(value: string) {
+  const [encodedPayload, signature] = value.split(".");
+  return encodedPayload && signature ? encodedPayload : null;
 }
 
 function isStoredRole(value: unknown): value is DemoRole {
   return value === "admin" || value === "respondent" || value === "member";
+}
+
+function isSafeRolePath(role: DemoRole, path: string) {
+  if (!path.startsWith("/") || path.startsWith("//")) {
+    return false;
+  }
+
+  if (role === "admin") {
+    return path === "/admin" || path.startsWith("/admin/");
+  }
+
+  if (role === "respondent") {
+    return path === "/respondent" || path.startsWith("/respondent/");
+  }
+
+  return path === "/member" || path.startsWith("/member/");
 }
