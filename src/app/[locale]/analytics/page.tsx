@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { CurrencyToggle, CurrencyValue } from "@/components/ui/currency-toggle";
+import { CurrencyValue } from "@/components/ui/currency-toggle";
 import { SITE_CONFIG } from "@/lib/constants";
 import { getFxRates } from "@/lib/fx-rates";
 import type { Locale } from "@/lib/i18n";
@@ -65,7 +65,7 @@ export default async function AnalyticsPage({
   return (
     <main className={isSpike ? "spike-analytics-page overflow-hidden bg-[#050505] text-[#f8f8f2]" : ""}>
       <section className="border-b border-black bg-white">
-        <div className="mx-auto grid max-w-7xl gap-8 px-6 py-10 lg:grid-cols-[1fr_27rem] lg:px-8 lg:py-14">
+        <div className="mx-auto max-w-7xl px-6 py-10 lg:px-8 lg:py-14">
           <div>
             <p className="text-xs font-black uppercase tracking-[0.18em] text-uga-green">
               {copy.heroEyebrow}
@@ -76,37 +76,6 @@ export default async function AnalyticsPage({
             <p className="mt-5 max-w-3xl text-base font-semibold leading-7 text-black/70 sm:text-lg">
               {copy.heroBody}
             </p>
-          </div>
-
-          <div className="border border-black bg-uga-mist p-4">
-            <p className="text-xs font-black uppercase tracking-[0.18em] text-uga-green">
-              {copy.filtersTitle}
-            </p>
-            <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
-              <FilterControl label={copy.commodityFilter}>
-                <select className="w-full rounded-[3px] border-black bg-white px-3 py-2 text-sm font-semibold text-black">
-                  <option>{copy.allCommodities}</option>
-                  {commodities.map((commodity) => (
-                    <option key={commodity.id}>{commodity.name[locale]}</option>
-                  ))}
-                </select>
-              </FilterControl>
-              <FilterControl label={copy.dateRangeFilter}>
-                <select className="w-full rounded-[3px] border-black bg-white px-3 py-2 text-sm font-semibold text-black">
-                  <option>{copy.last30Days}</option>
-                  <option>{copy.last90Days}</option>
-                  <option>{copy.fullPeriod}</option>
-                </select>
-              </FilterControl>
-              <FilterControl label={copy.basisFilter}>
-                <select className="w-full rounded-[3px] border-black bg-white px-3 py-2 text-sm font-semibold text-black">
-                  <option>{SITE_CONFIG.defaultDeliveryBasis}</option>
-                </select>
-              </FilterControl>
-              <FilterControl label={copy.currencyFilter}>
-                <CurrencyToggle label={copy.currencyToggleLabel} />
-              </FilterControl>
-            </div>
           </div>
         </div>
       </section>
@@ -696,21 +665,6 @@ function PublishedValuesTable({
         </table>
       </div>
     </div>
-  );
-}
-
-function FilterControl({
-  children,
-  label,
-}: {
-  children: ReactNode;
-  label: string;
-}) {
-  return (
-    <label className="grid gap-1.5 text-xs font-black uppercase tracking-[0.1em] text-black/55">
-      {label}
-      {children}
-    </label>
   );
 }
 
