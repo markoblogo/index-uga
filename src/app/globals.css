@@ -150,6 +150,10 @@ html[data-theme="dark"] body[data-index="uga"] .uga-internal-shell .admin-contra
   color: #06150d !important;
 }
 
+html[data-theme="dark"] body[data-index="uga"] .uga-internal-shell .admin-warning-pill {
+  color: #06150d !important;
+}
+
 body[data-index="spike"] {
   --color-surface-rgb: 9 9 9;
   --color-panel-rgb: 14 14 14;

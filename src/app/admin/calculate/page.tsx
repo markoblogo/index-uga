@@ -23,9 +23,10 @@ const statusLabels: Record<IndexCalculationStatus, string> = {
 };
 
 const statusClasses: Record<IndexCalculationStatus, string> = {
-  publishable: "bg-uga-green text-white ring-uga-green",
-  insufficient_data: "bg-amber-50 text-amber-800 ring-amber-200",
-  no_data: "bg-red-50 text-red-700 ring-red-200",
+  publishable: "admin-contrast-pill bg-uga-green text-white ring-uga-green",
+  insufficient_data:
+    "admin-warning-pill bg-amber-50 text-amber-800 ring-amber-200",
+  no_data: "admin-warning-pill bg-red-50 text-red-700 ring-red-200",
 };
 
 const noticeText: Record<string, string> = {
@@ -76,17 +77,17 @@ export default async function AdminCalculatePage({
             </h1>
             <p className="mt-3 max-w-3xl text-sm leading-6 text-black/65">
               Review median filtering, included respondent counts, outliers,
-              Spike indicatives, and publish only baskets with at least five
+              benchmark values, and publish only baskets with at least five
               included respondent prices.
             </p>
             <div className="mt-4 flex flex-wrap gap-2 text-xs font-semibold uppercase tracking-[0.12em]">
               <span className="rounded-full bg-uga-mist px-3 py-1 text-uga-green">
                 Source: {data.source}
               </span>
-              <span className="rounded-full bg-black px-3 py-1 text-white">
+              <span className="admin-dark-pill rounded-full bg-black px-3 py-1 text-white">
                 {data.basisLabel}
               </span>
-              <span className="rounded-full bg-black px-3 py-1 text-white">
+              <span className="admin-dark-pill rounded-full bg-black px-3 py-1 text-white">
                 Delivery {SITE_CONFIG.defaultDeliveryPeriod}
               </span>
             </div>
@@ -121,8 +122,8 @@ export default async function AdminCalculatePage({
       <div className="grid gap-3 rounded-[1.5rem] border border-black/10 bg-white p-4 shadow-sm lg:grid-cols-[1fr_auto_auto] lg:items-center">
         <div className="grid gap-2 text-sm leading-6 text-black/60">
           <p>
-            Spike is shown only as an external indicative. Insufficient baskets
-            are not published automatically.
+            Benchmark is shown only as an external reference. Insufficient
+            baskets are not published automatically.
           </p>
           <p className="font-semibold text-uga-dark">
             Independent verification step. In production, the
@@ -141,7 +142,7 @@ export default async function AdminCalculatePage({
         <form action={publish}>
           <input name="date" type="hidden" value={date} />
           <button
-            className="w-full rounded-full bg-uga-green px-5 py-3 text-sm font-semibold text-white shadow-soft transition hover:bg-uga-dark disabled:cursor-not-allowed disabled:bg-black/20 lg:w-auto"
+            className="admin-contrast-pill w-full rounded-full bg-uga-green px-5 py-3 text-sm font-semibold text-white shadow-soft transition hover:bg-uga-dark disabled:cursor-not-allowed disabled:bg-black/20 lg:w-auto"
             disabled={publishableCount === 0}
             type="submit"
           >
@@ -181,7 +182,7 @@ function CalculationPanel({
             <h2 className="text-2xl font-semibold tracking-tight">
               {commodity.name}
             </h2>
-            <span className="rounded-full bg-black px-3 py-1 text-xs font-semibold uppercase tracking-[0.12em] text-white">
+            <span className="admin-dark-pill rounded-full bg-black px-3 py-1 text-xs font-semibold uppercase tracking-[0.12em] text-white">
               {commodity.code}
             </span>
             <span
@@ -199,7 +200,7 @@ function CalculationPanel({
           <input name="date" type="hidden" value={date} />
           <input name="commodityId" type="hidden" value={commodity.id} />
           <button
-            className="rounded-full bg-uga-green px-5 py-3 text-sm font-semibold text-white shadow-soft transition hover:bg-uga-dark disabled:cursor-not-allowed disabled:bg-black/20"
+            className="admin-contrast-pill rounded-full bg-uga-green px-5 py-3 text-sm font-semibold text-white shadow-soft transition hover:bg-uga-dark disabled:cursor-not-allowed disabled:bg-black/20"
             disabled={
               commodity.status !== "publishable" || Boolean(commodity.published?.locked)
             }
@@ -211,12 +212,12 @@ function CalculationPanel({
       </div>
 
       <div className="mt-5 grid gap-3 md:grid-cols-2 xl:grid-cols-5">
-        <Metric label="Raw respondents" value={commodity.rawCount} />
+        <Metric label="Basket respondents" value={commodity.basketRespondentCount} />
         <Metric label="Included respondents" value={commodity.usedCount} />
         <Metric label="Median" value={formatUsd(commodity.median)} />
         <Metric label="UGA Index value" value={formatUsd(commodity.value)} strong />
         <Metric
-          label="Spike indicative"
+          label="Benchmark"
           value={formatUsd(commodity.spikeIndicative)}
         />
       </div>
@@ -242,7 +243,7 @@ function CalculationPanel({
 
         <div className="rounded-2xl border border-black/10 bg-uga-mist p-4">
           <h3 className="text-sm font-semibold uppercase tracking-[0.14em] text-black/45">
-            Spike comparison
+            Benchmark comparison
           </h3>
           <dl className="mt-3 grid gap-2 text-sm">
             <Row label="Difference" value={formatSignedUsd(commodity.spikeDifference)} />
@@ -253,8 +254,8 @@ function CalculationPanel({
           </dl>
           {commodity.status !== "publishable" ? (
             <p className="mt-4 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-sm font-semibold text-amber-800">
-              Insufficient data blocks publication. Spike remains external
-              indicative only.
+              Insufficient data blocks publication. Benchmark remains external
+              reference only.
             </p>
           ) : null}
         </div>

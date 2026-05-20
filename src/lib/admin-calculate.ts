@@ -22,6 +22,7 @@ import {
   hasDatabaseUrl,
   todayInputDate,
 } from "@/lib/admin-daily-inputs";
+import { getActiveRespondentCount } from "@/lib/respondent-directory";
 
 export { todayInputDate };
 
@@ -31,6 +32,7 @@ export type AdminCalculationCommodity = {
   name: string;
   version: number;
   status: IndexCalculationStatus;
+  basketRespondentCount: number;
   rawCount: number;
   usedCount: number;
   median: number | null;
@@ -118,6 +120,7 @@ export async function publishAdminIndices(formData: FormData, user: DemoUser) {
 
 async function getMockCalculationData(date: string): Promise<AdminCalculationData> {
   const inputData = await getDailyInputData(date);
+  const basketRespondentCount = getActiveRespondentCount();
   const respondentNameById = new Map(
     inputData.respondents.map((respondent) => [respondent.id, respondent.name]),
   );
@@ -163,6 +166,7 @@ async function getMockCalculationData(date: string): Promise<AdminCalculationDat
         }),
         respondentNameById,
         published,
+        basketRespondentCount,
       });
     }),
   };
@@ -251,6 +255,7 @@ async function getDatabaseCalculationData(date: string): Promise<AdminCalculatio
               locked: publishedIndex.locked,
             }
           : null,
+        basketRespondentCount: context.dbRespondents.length,
       });
     }),
   };
@@ -595,7 +600,9 @@ function buildCalculationCommodity({
   version,
   respondentNameById,
   published,
+  basketRespondentCount,
 }: {
+  basketRespondentCount: number;
   code: string;
   name: string;
   result: ReturnType<typeof calculateIndexValue>;
@@ -619,6 +626,7 @@ function buildCalculationCommodity({
     name,
     version,
     status: result.status,
+    basketRespondentCount,
     rawCount: result.rawCount,
     usedCount: result.usedCount,
     median: result.median === null ? null : roundToOneDecimal(result.median),
