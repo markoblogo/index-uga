@@ -40,13 +40,22 @@ const labels = {
     company: "Company",
     date: "Date",
     draftSaved: "Draft saved.",
+    lockedSubmitted: "Submitted values are locked and already transferred to UGA.",
     intro:
       "Submit today’s CPT UA Black Sea price indicatives for your company. Individual submissions are used for index calculation and are not published publicly.",
+    notPublished: "Not published",
     price: "Price",
+    publication: "Publication",
     saveDraft: "Save as draft",
     source: "Source",
+    status: "Status",
+    statusDraft: "Saved as draft",
+    statusEmpty: "Not started",
+    statusSubmitted: "Submitted to UGA",
     submit: "Submit",
     submitted: "Submitted",
+    submittedLocked:
+      "Prices are fixed in this form and transferred to UGA for processing.",
     submittedMessage: "Submitted values",
     title: "Daily respondent survey",
     unit: "Unit",
@@ -57,13 +66,22 @@ const labels = {
     company: "Компанія",
     date: "Дата",
     draftSaved: "Чернетку збережено.",
+    lockedSubmitted: "Подані значення зафіксовані та вже передані в УЗА.",
     intro:
       "Подайте сьогоднішні цінові індикативи CPT UA Black Sea від вашої компанії. Індивідуальні значення використовуються для розрахунку індексу і не публікуються відкрито.",
+    notPublished: "Не опубліковано",
     price: "Ціна",
+    publication: "Публікація",
     saveDraft: "Зберегти чернетку",
     source: "Джерело",
+    status: "Статус",
+    statusDraft: "Збережено як чернетку",
+    statusEmpty: "Не розпочато",
+    statusSubmitted: "Передано в УЗА",
     submit: "Подати",
     submitted: "Подано",
+    submittedLocked:
+      "Ціни зафіксовані у формі та передані в УЗА для обробки.",
     submittedMessage: "Подані значення",
     title: "Щоденна форма респондента",
     unit: "Одиниця",
@@ -108,6 +126,12 @@ export async function saveRespondentSurvey(formData: FormData, user: DemoUser) {
 
   if (!respondentId) {
     redirect(`/respondent?locale=${locale}&error=respondent`);
+  }
+
+  const currentData = await getRespondentSurveyData({ date, locale, respondentId });
+
+  if (currentData.status === "submitted") {
+    redirect(`/respondent?locale=${locale}&saved=locked`);
   }
 
   const entries = parsePrices(formData);

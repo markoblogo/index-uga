@@ -29,6 +29,13 @@ export default async function RespondentPage({
     locale,
     respondentId: user.respondentId ?? "",
   });
+  const isSubmitted = data.status === "submitted";
+  const statusLabel =
+    data.status === "submitted"
+      ? labels.statusSubmitted
+      : data.status === "draft"
+        ? labels.statusDraft
+        : labels.statusEmpty;
 
   async function save(formData: FormData) {
     "use server";
@@ -81,13 +88,22 @@ export default async function RespondentPage({
           <InfoItem label={labels.date} value={data.date} />
           <InfoItem label={labels.basis} value={data.basisLabel} />
           <InfoItem label={labels.unit} value="USD/t" />
+          <InfoItem label={labels.status} value={statusLabel} />
+          <InfoItem label={labels.publication} value={labels.notPublished} />
         </dl>
 
         {params.saved ? (
           <div className="mt-5 border border-uga-green bg-uga-mist px-4 py-3 text-sm font-semibold text-uga-green">
-            {params.saved === "submitted"
+            {params.saved === "locked"
+              ? labels.lockedSubmitted
+              : params.saved === "submitted"
               ? labels.submitted
               : labels.draftSaved}
+          </div>
+        ) : null}
+        {isSubmitted ? (
+          <div className="mt-5 border border-black bg-white px-4 py-3 text-sm font-semibold text-uga-dark">
+            {labels.submittedLocked}
           </div>
         ) : null}
       </div>
@@ -116,6 +132,7 @@ export default async function RespondentPage({
                 <input
                   className="box-border w-full min-w-0 border border-black/20 px-3 py-2.5 text-base font-semibold focus:border-uga-green focus:ring-uga-green"
                   defaultValue={commodity.price ?? ""}
+                  disabled={isSubmitted}
                   inputMode="decimal"
                   name={`price:${commodity.id}`}
                   placeholder="USD/t"
@@ -128,7 +145,8 @@ export default async function RespondentPage({
 
         <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-end">
           <button
-            className="rounded-[3px] border border-black px-5 py-3 text-sm font-semibold text-uga-dark transition hover:border-uga-green hover:text-uga-green"
+            className="rounded-[3px] border border-black px-5 py-3 text-sm font-semibold text-uga-dark transition hover:border-uga-green hover:text-uga-green disabled:cursor-not-allowed disabled:opacity-45"
+            disabled={isSubmitted}
             name="intent"
             type="submit"
             value="draft"
@@ -136,7 +154,8 @@ export default async function RespondentPage({
             {labels.saveDraft}
           </button>
           <button
-            className="rounded-[3px] bg-uga-green px-5 py-3 text-sm font-semibold text-white transition hover:bg-uga-dark"
+            className="rounded-[3px] bg-uga-green px-5 py-3 text-sm font-semibold text-white transition hover:bg-uga-dark disabled:cursor-not-allowed disabled:opacity-45"
+            disabled={isSubmitted}
             name="intent"
             type="submit"
             value="submit"
