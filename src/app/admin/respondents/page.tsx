@@ -217,10 +217,12 @@ function RespondentPanel({ respondent }: { respondent: RespondentDirectoryEntry 
   const primaryContact =
     respondent.contacts.find((contact) => contact.primary) ??
     respondent.contacts[0];
+  const editorId = `respondent-editor-${respondent.id}`;
 
   return (
-    <details className="group border-b border-black bg-white last:border-b-0 [&_summary::-webkit-details-marker]:hidden">
-      <summary className="grid cursor-pointer gap-3 px-4 py-4 transition hover:bg-uga-mist/70 lg:grid-cols-[minmax(22rem,1.35fr)_minmax(16rem,0.85fr)_minmax(20rem,1fr)_auto] lg:items-center">
+    <div className="group border-b border-black bg-white last:border-b-0">
+      <input className="peer sr-only" id={editorId} type="checkbox" />
+      <div className="grid gap-3 px-4 py-4 transition hover:bg-uga-mist/70 peer-checked:bg-uga-mist/70 peer-checked:[&_.close-label]:inline peer-checked:[&_.edit-label]:hidden lg:grid-cols-[minmax(22rem,1.35fr)_minmax(16rem,0.85fr)_minmax(20rem,1fr)_auto] lg:items-center">
         <div className="min-w-0">
           <h2 className="truncate text-base font-black leading-5">
             {respondent.companyName}
@@ -245,25 +247,30 @@ function RespondentPanel({ respondent }: { respondent: RespondentDirectoryEntry 
               : "password set"}
           </p>
         </div>
-        <div className="flex flex-wrap items-center gap-2 lg:justify-end">
-          <StatusPill tone={respondent.status === "active" ? "active" : "muted"}>
-            {respondent.status}
-          </StatusPill>
-          <StatusPill
-            tone={
-              respondent.collectionMode === "self_service" ? "active" : "warning"
-            }
+        <div className="flex items-center gap-3 lg:justify-end">
+          <label
+            className="cursor-pointer border border-black px-3 py-2 text-[0.66rem] font-black uppercase tracking-[0.12em] text-black/60 transition hover:border-uga-green hover:text-uga-green"
+            htmlFor={editorId}
           >
-            {respondent.collectionMode === "self_service" ? "site form" : "manual"}
-          </StatusPill>
-          <span className="border border-black px-2 py-1 text-[0.66rem] font-black uppercase tracking-[0.12em] text-black/55">
-            <span className="group-open:hidden">Edit</span>
-            <span className="hidden group-open:inline">Close</span>
-          </span>
+            <span className="edit-label">Edit</span>
+            <span className="close-label hidden">Close</span>
+          </label>
+          <div className="grid justify-items-end gap-1">
+            <StatusPill tone={respondent.status === "active" ? "active" : "muted"}>
+              {respondent.status}
+            </StatusPill>
+            <StatusPill
+              tone={
+                respondent.collectionMode === "self_service" ? "active" : "warning"
+              }
+            >
+              {respondent.collectionMode === "self_service" ? "site form" : "manual"}
+            </StatusPill>
+          </div>
         </div>
-      </summary>
+      </div>
 
-      <div className="border-t border-black bg-uga-mist/45 p-4">
+      <div className="hidden border-t border-black bg-uga-mist/45 p-4 peer-checked:block">
         <div className="grid gap-4 2xl:grid-cols-[minmax(24rem,0.8fr)_minmax(38rem,1.35fr)_minmax(24rem,0.85fr)]">
           <section className="border border-black/20 bg-white p-4">
             <p className="mb-3 text-[0.68rem] font-black uppercase tracking-[0.16em] text-black/45">
@@ -333,7 +340,7 @@ function RespondentPanel({ respondent }: { respondent: RespondentDirectoryEntry 
           <RespondentAuthPanel respondent={respondent} />
         </div>
       </div>
-    </details>
+    </div>
   );
 }
 
