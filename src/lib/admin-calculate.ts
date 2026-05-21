@@ -41,6 +41,7 @@ export type AdminCalculationCommodity = {
   spikeIndicative: number | null;
   spikeDifference: number | null;
   spikeDeviationPct: number | null;
+  benchmarkBlendedValue: number | null;
   excluded: Array<{
     respondentId: string;
     respondentName: string;
@@ -109,20 +110,23 @@ export async function recalculateAdminIndices(formData: FormData, user: DemoUser
 
 export async function publishAdminIndices(formData: FormData, user: DemoUser) {
   const date = String(formData.get("date") ?? todayInputDate());
+  const benchmarkBlendCommodityIds = new Set(
+    formData.getAll("benchmarkBlendCommodityIds").map(String),
+  );
 
   if (await isPublicationLockedForDate(date)) {
     redirect(`/admin/calculate?date=${date}&notice=locked`);
   }
 
   if (!hasDatabaseUrl()) {
-    await publishMockIndices(date);
+    await publishMockIndices(date, benchmarkBlendCommodityIds);
     revalidatePath("/uk");
     revalidatePath("/en");
     redirect(`/admin/calculate?date=${date}&notice=published_mock`);
   }
 
   const calculations = await persistDatabaseCalculations(date, user);
-  await publishDatabaseCalculations(date, calculations, user);
+  await publishDatabaseCalculations(date, calculations, user, benchmarkBlendCommodityIds);
   revalidatePath("/uk");
   revalidatePath("/en");
   redirect(`/admin/calculate?date=${date}&notice=published_database`);
@@ -185,7 +189,10 @@ async function getMockCalculationData(date: string): Promise<AdminCalculationDat
   };
 }
 
-async function publishMockIndices(date: string) {
+async function publishMockIndices(
+  date: string,
+  benchmarkBlendCommodityIds: Set<string>,
+) {
   const data = await getMockCalculationData(date);
 
   for (const commodity of data.commodities) {
@@ -208,13 +215,18 @@ async function publishMockIndices(date: string) {
       date,
       deliveryBasisId: MOCK_BASIS_ID,
     });
-    const change = computePublishedChange(commodity.value, previous?.value ?? null);
+    const publishedValue =
+      benchmarkBlendCommodityIds.has(commodity.id) &&
+      commodity.benchmarkBlendedValue !== null
+        ? commodity.benchmarkBlendedValue
+        : commodity.value;
+    const change = computePublishedChange(publishedValue, previous?.value ?? null);
 
     setDemoPublishedIndex({
       commodityId: commodity.id,
       date,
       deliveryBasisId: MOCK_BASIS_ID,
-      value: commodity.value,
+      value: publishedValue,
       ...change,
       locked: true,
       publishedAt: new Date().toISOString(),
@@ -405,6 +417,7 @@ async function publishDatabaseCalculations(
   date: string,
   calculations: Awaited<ReturnType<typeof persistDatabaseCalculations>>,
   user: DemoUser,
+  benchmarkBlendCommodityIds: Set<string>,
 ) {
   const publisherUserId = await getDatabaseUserId(user);
 
@@ -442,7 +455,22 @@ async function publishDatabaseCalculations(
       },
       orderBy: { tradeDate: "desc" },
     });
-    const currentValue = calculation.publicValueUsdPerMt.toNumber();
+    const calculatedValue = calculation.publicValueUsdPerMt.toNumber();
+    const benchmarkIndicative = benchmarkBlendCommodityIds.has(calculation.commodityId)
+      ? await db.externalIndicative.findFirst({
+          where: {
+            tradeDate: calculation.tradeDate,
+            commodityId: calculation.commodityId,
+            deliveryBasisId: calculation.deliveryBasisId,
+            source: "spike",
+          },
+        })
+      : null;
+    const currentValue = benchmarkIndicative
+      ? roundToOneDecimal(
+          (calculatedValue + benchmarkIndicative.priceUsdPerMt.toNumber()) / 2,
+        )
+      : calculatedValue;
     const change = computePublishedChange(
       currentValue,
       previous?.valueUsdPerMt.toNumber() ?? null,
@@ -484,6 +512,9 @@ async function publishDatabaseCalculations(
           tradeDate: date,
           commodityId: calculation.commodityId,
           valueUsdPerMt: currentValue,
+          benchmarkBlendApplied: Boolean(benchmarkIndicative),
+          benchmarkValueUsdPerMt:
+            benchmarkIndicative?.priceUsdPerMt.toNumber() ?? null,
           changeAbsUsdPerMt: change.changeAbs,
           changePct: change.changePct,
           locked: true,
@@ -653,6 +684,10 @@ function buildCalculationCommodity({
     spikeDifference === null || spikeIndicative === null
       ? null
       : roundToTwoDecimals((spikeDifference / spikeIndicative) * 100);
+  const benchmarkBlendedValue =
+    result.value === null || spikeIndicative === null
+      ? null
+      : roundToOneDecimal((result.value + spikeIndicative) / 2);
 
   return {
     id: result.commodityId,
@@ -669,6 +704,7 @@ function buildCalculationCommodity({
     spikeIndicative,
     spikeDifference,
     spikeDeviationPct,
+    benchmarkBlendedValue,
     excluded: result.excluded.map((item) => ({
       ...item,
       respondentName: respondentNameById.get(item.respondentId) ?? item.respondentId,

@@ -139,7 +139,7 @@ export default async function AdminCalculatePage({
         ) : null}
       </div>
 
-      <div className="grid gap-3 rounded-[1.5rem] border border-black/10 bg-white p-4 shadow-sm lg:grid-cols-[1fr_auto_auto] lg:items-center">
+      <div className="grid gap-3 rounded-[1.5rem] border border-black/10 bg-white p-4 shadow-sm lg:grid-cols-[1fr_auto] lg:items-center">
         <div className="grid gap-2 text-sm leading-6 text-black/60">
           <p>
             Benchmark is shown only as an external reference. Insufficient
@@ -160,8 +160,28 @@ export default async function AdminCalculatePage({
             Recalculate
           </button>
         </form>
-        <form action={publish}>
-          <input name="date" type="hidden" value={date} />
+      </div>
+
+      <form
+        action={publish}
+        className="rounded-[1.5rem] border border-black/10 bg-white shadow-sm"
+      >
+        <input name="date" type="hidden" value={date} />
+        <div className="grid gap-4 border-b border-black/10 p-4 lg:grid-cols-[1fr_auto] lg:items-center">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-uga-green">
+              Publication board
+            </p>
+            <h2 className="mt-2 text-2xl font-semibold tracking-tight">
+              All commodity indices
+            </h2>
+            <p className="mt-2 max-w-3xl text-sm leading-6 text-black/60">
+              Each row shows the respondent basket, included sample, median,
+              calculated UGA Index value and benchmark reference. Optional
+              benchmark blend averages the UGA calculation with benchmark before
+              publication.
+            </p>
+          </div>
           <button
             className="admin-contrast-pill w-full rounded-full bg-uga-green px-5 py-3 text-sm font-semibold text-white shadow-soft transition hover:bg-uga-dark disabled:cursor-not-allowed disabled:bg-black/20 lg:w-auto"
             disabled={publishableCount === 0}
@@ -169,31 +189,53 @@ export default async function AdminCalculatePage({
           >
             Publish UGA Index
           </button>
-        </form>
-      </div>
+        </div>
 
-      <div className="grid gap-5">
-        {data.commodities.map((commodity) => (
-          <CalculationPanel commodity={commodity} key={commodity.id} />
-        ))}
-      </div>
+        <div className="overflow-x-auto">
+          <table className="w-full min-w-[1120px] text-left">
+            <thead className="bg-uga-dark text-xs uppercase tracking-[0.14em] text-white/70">
+              <tr>
+                <th className="px-4 py-3 font-semibold">Commodity</th>
+                <th className="px-4 py-3 font-semibold">Basket</th>
+                <th className="px-4 py-3 font-semibold">Included</th>
+                <th className="px-4 py-3 font-semibold">Median</th>
+                <th className="px-4 py-3 font-semibold">UGA Index</th>
+                <th className="px-4 py-3 font-semibold">Benchmark</th>
+                <th className="px-4 py-3 font-semibold">Blend</th>
+                <th className="px-4 py-3 font-semibold">Lock</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-black/10">
+              {data.commodities.map((commodity) => (
+                <CalculationRow commodity={commodity} key={commodity.id} />
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </form>
     </section>
   );
 }
 
-function CalculationPanel({
+function CalculationRow({
   commodity,
 }: {
   commodity: AdminCalculationCommodity;
 }) {
+  const canBlend =
+    commodity.status === "publishable" &&
+    commodity.value !== null &&
+    commodity.spikeIndicative !== null &&
+    !commodity.published?.locked;
+
   return (
-    <article className="rounded-[1.5rem] border border-black/10 bg-white p-5 shadow-sm">
-      <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
-        <div>
-          <div className="flex flex-wrap items-center gap-3">
-            <h2 className="text-2xl font-semibold tracking-tight">
+    <>
+      <tr className="align-top">
+        <td className="px-4 py-4">
+          <div className="flex flex-wrap items-center gap-2">
+            <p className="text-lg font-semibold tracking-tight text-uga-dark">
               {commodity.name}
-            </h2>
+            </p>
             <span className="admin-dark-pill rounded-full bg-black px-3 py-1 text-xs font-semibold uppercase tracking-[0.12em] text-white">
               {commodity.code}
             </span>
@@ -203,89 +245,75 @@ function CalculationPanel({
               {statusLabels[commodity.status]}
             </span>
           </div>
-          <p className="mt-2 text-sm text-black/55">
+          <p className="mt-2 text-xs font-semibold uppercase tracking-[0.12em] text-black/45">
             Calculation version {commodity.version}
           </p>
-        </div>
-
-        {commodity.published?.locked ? (
-          <span className="rounded-full bg-uga-lime px-4 py-2 text-xs font-semibold uppercase tracking-[0.12em] text-black">
-            published locked
-          </span>
-        ) : null}
-      </div>
-
-      <div className="mt-5 grid gap-3 md:grid-cols-2 xl:grid-cols-5">
-        <Metric label="Basket respondents" value={commodity.basketRespondentCount} />
-        <Metric label="Included respondents" value={commodity.usedCount} />
-        <Metric label="Median" value={formatUsd(commodity.median)} />
-        <Metric label="UGA Index value" value={formatUsd(commodity.value)} strong />
-        <Metric
-          label="Benchmark"
-          value={formatUsd(commodity.spikeIndicative)}
-        />
-      </div>
-
-      <div className="mt-5 grid gap-4">
-        <div className="rounded-2xl border border-black/10 bg-white p-4">
-          <h3 className="text-sm font-semibold uppercase tracking-[0.14em] text-black/45">
-            Published lock
-          </h3>
-          {commodity.published ? (
-            <dl className="mt-3 grid gap-2 text-sm">
-              <Row label="Published value" value={formatUsd(commodity.published.value)} />
-              <Row
-                label="Change"
-                value={`${formatSignedUsd(commodity.published.changeAbs)} · ${formatSignedPercent(commodity.published.changePct)}`}
+        </td>
+        <td className="px-4 py-4">
+          <Metric label="Respondents" value={commodity.basketRespondentCount} />
+        </td>
+        <td className="px-4 py-4">
+          <Metric label="Used" value={commodity.usedCount} />
+        </td>
+        <td className="px-4 py-4">
+          <Metric label="Median" value={formatUsd(commodity.median)} />
+        </td>
+        <td className="px-4 py-4">
+          <Metric label="Calculated" value={formatUsd(commodity.value)} strong />
+        </td>
+        <td className="px-4 py-4">
+          <Metric label="Reference" value={formatUsd(commodity.spikeIndicative)} />
+        </td>
+        <td className="px-4 py-4">
+          <label className="grid max-w-[14rem] gap-2 text-sm">
+            <span className="flex items-center gap-2 font-semibold text-uga-dark">
+              <input
+                className="size-4 rounded-none border-black/20 text-uga-green"
+                disabled={!canBlend}
+                name="benchmarkBlendCommodityIds"
+                type="checkbox"
+                value={commodity.id}
               />
-              <Row label="Locked" value={commodity.published.locked ? "yes" : "no"} />
-            </dl>
+              Use benchmark blend
+            </span>
+            <span className="text-xs leading-5 text-black/55">
+              {commodity.benchmarkBlendedValue === null
+                ? "Unavailable"
+                : `Publish value if on: ${formatUsd(commodity.benchmarkBlendedValue)}`}
+            </span>
+          </label>
+        </td>
+        <td className="px-4 py-4">
+          {commodity.published?.locked ? (
+            <div className="grid gap-2">
+              <span className="w-fit rounded-full bg-uga-lime px-3 py-1 text-xs font-semibold uppercase tracking-[0.12em] text-black">
+                published locked
+              </span>
+              <span className="text-xs text-black/55">
+                {formatUsd(commodity.published.value)}
+              </span>
+            </div>
           ) : (
-            <p className="mt-3 text-sm text-black/55">Not published for this date.</p>
+            <span className="text-sm text-black/55">Not published</span>
           )}
-        </div>
-      </div>
-
-      <div className="mt-5 rounded-2xl border border-black/10 bg-white">
-        <div className="border-b border-black/10 px-4 py-3">
-          <h3 className="text-sm font-semibold uppercase tracking-[0.14em] text-black/45">
-            Excluded outliers
-          </h3>
-        </div>
-        {commodity.excluded.length > 0 ? (
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-[620px] text-left text-sm">
-              <thead className="bg-uga-dark text-xs uppercase tracking-[0.14em] text-white/70">
-                <tr>
-                  <th className="px-4 py-3 font-semibold">Respondent</th>
-                  <th className="px-4 py-3 font-semibold">Price</th>
-                  <th className="px-4 py-3 font-semibold">Deviation</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-black/10">
-                {commodity.excluded.map((item) => (
-                  <tr key={item.respondentId}>
-                    <td className="px-4 py-3 font-semibold text-uga-dark">
-                      {item.respondentName}
-                    </td>
-                    <td className="px-4 py-3 text-black/60">
-                      {formatUsd(item.price)}
-                    </td>
-                    <td className="px-4 py-3 font-semibold text-red-700">
-                      {item.deviationPct.toFixed(2)}%
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        ) : (
-          <p className="px-4 py-4 text-sm text-black/55">
-            No outliers excluded by the +/-2% median rule.
-          </p>
-        )}
-      </div>
-    </article>
+        </td>
+      </tr>
+      {commodity.excluded.length > 0 ? (
+        <tr>
+          <td className="px-4 pb-4 pt-0" colSpan={8}>
+            <div className="border border-red-200 bg-red-50 px-3 py-2 text-xs font-semibold text-red-700">
+              Excluded outliers:{" "}
+              {commodity.excluded
+                .map(
+                  (item) =>
+                    `${item.respondentName} ${formatUsd(item.price)} (${item.deviationPct.toFixed(2)}%)`,
+                )
+                .join("; ")}
+            </div>
+          </td>
+        </tr>
+      ) : null}
+    </>
   );
 }
 
@@ -299,15 +327,15 @@ function Metric({
   value: number | string;
 }) {
   return (
-    <div className="rounded-2xl border border-black/10 bg-white p-4">
-      <p className="text-xs font-semibold uppercase tracking-[0.14em] text-black/45">
+    <div className="min-w-[8rem]">
+      <p className="text-[0.65rem] font-semibold uppercase tracking-[0.14em] text-black/45">
         {label}
       </p>
       <p
         className={
           strong
-            ? "mt-2 text-2xl font-semibold tracking-tight text-uga-green"
-            : "mt-2 text-xl font-semibold tracking-tight text-uga-dark"
+            ? "mt-1 text-lg font-semibold tracking-tight text-uga-green"
+            : "mt-1 text-base font-semibold tracking-tight text-uga-dark"
         }
       >
         {value}
@@ -316,31 +344,6 @@ function Metric({
   );
 }
 
-function Row({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="flex justify-between gap-4">
-      <dt className="text-black/55">{label}</dt>
-      <dd className="font-semibold text-uga-dark">{value}</dd>
-    </div>
-  );
-}
-
 function formatUsd(value: number | null) {
   return value === null ? "n/a" : `$${value.toFixed(1)} USD/t`;
-}
-
-function formatSignedUsd(value: number | null) {
-  if (value === null) {
-    return "n/a";
-  }
-
-  return `${value > 0 ? "+" : ""}${value.toFixed(1)} USD/t`;
-}
-
-function formatSignedPercent(value: number | null) {
-  if (value === null) {
-    return "n/a";
-  }
-
-  return `${value > 0 ? "+" : ""}${value.toFixed(2)}%`;
 }
